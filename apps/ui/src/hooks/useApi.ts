@@ -184,7 +184,17 @@ export function useApi() {
     }
   };
 
+  // Cache quota for 30 seconds to reduce API calls
+  let quotaCache: { data: any; timestamp: number } | null = null;
+  
   const getQuota = async () => {
+    const now = Date.now();
+    
+    // Return cached data if less than 30 seconds old
+    if (quotaCache && (now - quotaCache.timestamp) < 30000) {
+      return quotaCache.data;
+    }
+    
     try {
       const response = await fetch(`${API_BASE_URL}/api/quota`);
       const result = await handleApiResponse<{
@@ -192,6 +202,9 @@ export function useApi() {
         remaining: number;
         resetAt: string;
       }>(response);
+      
+      // Cache the result
+      quotaCache = { data: result, timestamp: now };
       
       setQuota(result);
       return result;
