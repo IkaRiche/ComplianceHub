@@ -37,13 +37,23 @@ export function useApi() {
 
     const data: ApiResponse<T> = await response.json();
     
-    // Update quota if provided
+    // Update quota if provided in response
     if (data.meta?.quota) {
       setQuota({
-        used: 0, // We don't get used count in response
+        used: Math.max(0, 100 - data.meta.quota.remaining), // Calculate used from remaining
         remaining: data.meta.quota.remaining,
         resetAt: data.meta.quota.resetAt,
       });
+      
+      // Update global cache as well
+      quotaCache = {
+        data: {
+          used: Math.max(0, 100 - data.meta.quota.remaining),
+          remaining: data.meta.quota.remaining,
+          resetAt: data.meta.quota.resetAt,
+        },
+        timestamp: Date.now()
+      };
     }
 
     if (!data.success) {
