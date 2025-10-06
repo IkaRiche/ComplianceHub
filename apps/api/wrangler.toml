@@ -1,0 +1,22 @@
+name = "compliance-hub-api"
+main = "src/index.ts"
+compatibility_date = "2025-10-06"
+node_compat = true
+
+# KV for quota management
+kv_namespaces = [
+  { binding = "KV_QUOTA", id = "your-kv-quota-id", preview_id = "your-kv-quota-preview-id" }
+]
+
+# Environment variables
+[vars]
+API_VERSION = "2025-10-06"
+MAX_FILE_SIZE = "5242880"  # 5MB
+FREE_QUOTA_DAILY = "100"
+
+# CORS configuration
+[env.production]
+name = "compliance-hub-api"
+
+[env.staging]
+name = "compliance-hub-api-staging"

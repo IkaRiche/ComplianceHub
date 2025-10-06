@@ -1,0 +1,34 @@
+
+> @compliance-hub/core-ubl@1.0.0 build
+> tsc
+
+src/flatten.ts(2,67): error TS2307: Cannot find module '@compliance-hub/shared' or its corresponding type declarations.
+src/flatten.ts(3,45): error TS2307: Cannot find module '@compliance-hub/shared' or its corresponding type declarations.
+src/flatten.ts(100,21): error TS7053: Element implicitly has an 'any' type because expression of type '"cbc:ID"' can't be used to index type '{ 'cbc:Percent': string; 'cbc:TaxExemptionReasonCode'?: string | undefined; 'cbc:TaxExemptionReason'?: string | undefined; }'.
+  Property 'cbc:ID' does not exist on type '{ 'cbc:Percent': string; 'cbc:TaxExemptionReasonCode'?: string | undefined; 'cbc:TaxExemptionReason'?: string | undefined; }'.
+src/flatten.ts(125,17): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:PostalAddress"' can't be used to index type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+  Property 'cac:PostalAddress' does not exist on type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+src/flatten.ts(126,15): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:PostalAddress"' can't be used to index type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+  Property 'cac:PostalAddress' does not exist on type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+src/flatten.ts(127,14): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:PostalAddress"' can't be used to index type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+  Property 'cac:PostalAddress' does not exist on type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+src/flatten.ts(128,18): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:PostalAddress"' can't be used to index type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+  Property 'cac:PostalAddress' does not exist on type '{ 'cac:PartyName': { 'cbc:Name': string; }; 'cac:PartyTaxScheme'?: { 'cbc:CompanyID': string; } | undefined; }'.
+src/flatten.ts(138,19): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:OrderReference"' can't be used to index type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+  Property 'cac:OrderReference' does not exist on type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+src/flatten.ts(139,22): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:ContractDocumentReference"' can't be used to index type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+  Property 'cac:ContractDocumentReference' does not exist on type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+src/flatten.ts(140,21): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:ProjectReference"' can't be used to index type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+  Property 'cac:ProjectReference' does not exist on type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+src/rules.ts(1,47): error TS2307: Cannot find module '@compliance-hub/shared' or its corresponding type declarations.
+src/rules.ts(2,57): error TS2307: Cannot find module '@compliance-hub/shared' or its corresponding type declarations.
+src/rules.ts(384,23): error TS7053: Element implicitly has an 'any' type because expression of type '"cac:AdditionalDocumentReference"' can't be used to index type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+  Property 'cac:AdditionalDocumentReference' does not exist on type '{ 'cbc:CustomizationID'?: string | undefined; 'cbc:ProfileID'?: string | undefined; 'cbc:ID'?: string | undefined; 'cbc:IssueDate'?: string | undefined; 'cbc:DueDate'?: string | undefined; ... 9 more ...; 'cac:InvoiceNote'?: { ...; }[] | undefined; }'.
+src/validator.ts(2,46): error TS2307: Cannot find module '@compliance-hub/shared' or its corresponding type declarations.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path /home/user/webapp/packages/core-ubl
+npm error workspace @compliance-hub/core-ubl@1.0.0
+npm error location /home/user/webapp/packages/core-ubl
+npm error command failed
+npm error command sh -c tsc
