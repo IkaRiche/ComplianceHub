@@ -450,25 +450,130 @@ async function validateUbl(xmlContent: string, vida = false): Promise<Validation
   }
 }
 
-// Quota management (simplified)
+// Quota management
 function getUserId(request: Request): string {
-  const forwarded = request.headers.get('CF-Connecting-IP') || 
-                   request.headers.get('X-Forwarded-For') || 
-                   'unknown';
-  return forwarded.split(',')[0].trim();
+  const ip = request.headers.get('CF-Connecting-IP') || 
+             request.headers.get('X-Forwarded-For') || 
+             'unknown';
+  const userAgent = request.headers.get('User-Agent') || '';
+  
+  // Simple hash for demo purposes
+  return btoa(ip + userAgent.slice(0, 50)).replace(/[^a-zA-Z0-9]/g, '').slice(0, 32);
 }
 
-async function checkQuota(userId: string, env: Env): Promise<{ allowed: boolean; remaining: number; resetAt: string }> {
-  // Simplified quota - in production this would use KV storage
+async function checkQuota(userId: string, env: Env): Promise<{ 
+  allowed: boolean; 
+  remaining: number; 
+  resetAt: string; 
+}> {
+  const maxDaily = parseInt(env.FREE_QUOTA_DAILY || '100');
   const now = new Date();
-  const resetAt = new Date(now);
-  resetAt.setHours(23, 59, 59, 999); // Reset at end of day
+  const today = now.toISOString().split('T')[0];
+  
+  // Check if KV is available
+  if (!env.KV_QUOTA) {
+    console.warn('KV_QUOTA not available, allowing request');
+    return {
+      allowed: true,
+      remaining: maxDaily - 1,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  }
+  
+  // Get current quota record
+  const quotaKey = `quota:${userId}`;
+  const quotaDataStr = await env.KV_QUOTA.get(quotaKey);
+  
+  let quotaRecord: { uses: number; lastReset: string; resetAt: string };
+  
+  if (!quotaDataStr) {
+    // New user
+    quotaRecord = {
+      uses: 0,
+      lastReset: today,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  } else {
+    quotaRecord = JSON.parse(quotaDataStr);
+    
+    // Check if we need to reset daily quota
+    if (quotaRecord.lastReset !== today) {
+      quotaRecord.uses = 0;
+      quotaRecord.lastReset = today;
+      quotaRecord.resetAt = getNextResetDate(now).toISOString();
+    }
+  }
+  
+  const remaining = Math.max(0, maxDaily - quotaRecord.uses);
+  const allowed = remaining > 0;
+  
+  if (allowed) {
+    // Increment usage
+    quotaRecord.uses += 1;
+    await env.KV_QUOTA.put(quotaKey, JSON.stringify(quotaRecord), {
+      expirationTtl: 86400 * 2, // 2 days TTL
+    });
+  }
   
   return {
-    allowed: true, // Always allow for now
-    remaining: 100,
-    resetAt: resetAt.toISOString(),
+    allowed,
+    remaining: Math.max(0, remaining - (allowed ? 1 : 0)),
+    resetAt: quotaRecord.resetAt,
   };
+}
+
+async function getQuotaInfo(userId: string, env: Env): Promise<{
+  used: number;
+  remaining: number;
+  resetAt: string;
+}> {
+  const maxDaily = parseInt(env.FREE_QUOTA_DAILY || '100');
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  
+  // Check if KV is available
+  if (!env.KV_QUOTA) {
+    return {
+      used: 0,
+      remaining: maxDaily,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  }
+  
+  const quotaKey = `quota:${userId}`;
+  const quotaDataStr = await env.KV_QUOTA.get(quotaKey);
+  
+  if (!quotaDataStr) {
+    return {
+      used: 0,
+      remaining: maxDaily,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  }
+  
+  const quotaRecord: { uses: number; lastReset: string; resetAt: string } = JSON.parse(quotaDataStr);
+  
+  // Reset if new day
+  if (quotaRecord.lastReset !== today) {
+    return {
+      used: 0,
+      remaining: maxDaily,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  }
+  
+  return {
+    used: quotaRecord.uses,
+    remaining: Math.max(0, maxDaily - quotaRecord.uses),
+    resetAt: quotaRecord.resetAt,
+  };
+}
+
+function getNextResetDate(now: Date): Date {
+  const tomorrow = new Date(now);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  tomorrow.setUTCHours(0, 0, 0, 0);
+  return tomorrow;
 }
 
 // Create router with base path
@@ -538,12 +643,12 @@ router.get('/health', (request: Request, env: Env) => {
 router.get('/quota', async (request: Request, env: Env) => {
   try {
     const userId = getUserId(request);
-    const quotaCheck = await checkQuota(userId, env);
+    const quotaInfo = await getQuotaInfo(userId, env);
     
     return createResponse({
-      used: 100 - quotaCheck.remaining, // Calculate used from remaining
-      remaining: quotaCheck.remaining,
-      resetAt: quotaCheck.resetAt,
+      used: quotaInfo.used,
+      remaining: quotaInfo.remaining,
+      resetAt: quotaInfo.resetAt,
     });
   } catch (error) {
     console.error('Quota check error:', error);
