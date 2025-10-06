@@ -1,7 +1,6 @@
 import React from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Info, Award, Download, FileText } from 'lucide-react';
 import { ValidationResult } from '@compliance-hub/shared';
-import { jsPDF } from 'jspdf';
 
 interface ValidationResultsProps {
   result: ValidationResult;

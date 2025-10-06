@@ -101,109 +101,15 @@ export default function App() {
     if (!validationResult) return;
     
     try {
-      const { jsPDF } = await import('jspdf');
-      const doc = new jsPDF();
-      
-      // Header
-      doc.setFontSize(20);
-      doc.text('ViDA UBL Validation Report', 20, 30);
-      
-      doc.setFontSize(12);
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 45);
-      doc.text(`Profile: EN 16931 v2 & Peppol BIS 4.0`, 20, 55);
-      
-      // Overall Status
-      doc.setFontSize(16);
-      doc.text('Validation Summary', 20, 75);
-      
-      doc.setFontSize(12);
-      const statusText = validationResult.valid ? '✓ PASSED' : '✗ FAILED';
-      const statusColor = validationResult.valid ? [0, 128, 0] : [255, 0, 0];
-      doc.setTextColor(...statusColor);
-      doc.text(`Status: ${statusText}`, 20, 90);
-      doc.setTextColor(0, 0, 0);
-      
-      doc.text(`Errors: ${validationResult.errors?.length || 0}`, 20, 105);
-      doc.text(`Warnings: ${validationResult.warnings?.length || 0}`, 20, 115);
-      
-      // ViDA Compliance
-      if (validationResult.vida) {
-        doc.setFontSize(16);
-        doc.text('ViDA Compliance Score', 20, 135);
-        
-        doc.setFontSize(12);
-        const scoreText = `${validationResult.vida.score}/100`;
-        const alignedText = validationResult.vida.aligned ? '(ViDA Aligned)' : '(Not ViDA Aligned)';
-        doc.text(`Score: ${scoreText} ${alignedText}`, 20, 150);
-        
-        // Checklist
-        if (validationResult.vida.checklist) {
-          let yPos = 165;
-          validationResult.vida.checklist.forEach((item, index) => {
-            const status = item.passed ? '✓' : '✗';
-            const color = item.passed ? [0, 128, 0] : [255, 0, 0];
-            doc.setTextColor(...color);
-            doc.text(`${status}`, 20, yPos);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`${item.title}`, 30, yPos);
-            yPos += 10;
-          });
-        }
-      }
-      
-      // Add new page for detailed issues if needed
-      if ((validationResult.errors?.length || 0) > 0 || (validationResult.warnings?.length || 0) > 0) {
-        doc.addPage();
-        doc.setFontSize(16);
-        doc.text('Detailed Issues', 20, 30);
-        
-        let yPos = 50;
-        
-        // Errors
-        if (validationResult.errors?.length) {
-          doc.setFontSize(14);
-          doc.setTextColor(255, 0, 0);
-          doc.text('Errors:', 20, yPos);
-          doc.setTextColor(0, 0, 0);
-          yPos += 15;
-          
-          validationResult.errors.forEach((error, index) => {
-            doc.setFontSize(10);
-            const lines = doc.splitTextToSize(`${error.ruleId}: ${error.message}`, 170);
-            doc.text(lines, 20, yPos);
-            yPos += lines.length * 5 + 5;
-          });
-        }
-        
-        // Warnings
-        if (validationResult.warnings?.length) {
-          doc.setFontSize(14);
-          doc.setTextColor(255, 165, 0);
-          doc.text('Warnings:', 20, yPos + 10);
-          doc.setTextColor(0, 0, 0);
-          yPos += 25;
-          
-          validationResult.warnings.forEach((warning, index) => {
-            doc.setFontSize(10);
-            const lines = doc.splitTextToSize(`${warning.ruleId}: ${warning.message}`, 170);
-            doc.text(lines, 20, yPos);
-            yPos += lines.length * 5 + 5;
-          });
-        }
-      }
-      
-      // Footer
-      const pageCount = doc.internal.pages.length - 1;
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.text('ComplianceHub • ViDA UBL Validator • compliancehub.pages.dev', 20, 285);
-      }
-      
-      doc.save(`vida-validation-report-${Date.now()}.pdf`);
+      const { generateValidationPDF } = await import('./utils/pdfGenerator.js');
+      generateValidationPDF(validationResult, {
+        filename: `vida-validation-report-${Date.now()}.pdf`,
+        includeDetailedErrors: true,
+        includeWarnings: true,
+      });
     } catch (err) {
       console.error('PDF generation error:', err);
-      alert('PDF generation failed. Please try again.');
+      alert('PDF generation failed. Please try downloading JSON instead.');
     }
   };
 
