@@ -16,8 +16,8 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// Force rebuild - API endpoints fixed
-const API_BASE = 'https://compliancehub-api.heizungsrechner.workers.dev';
+// Force rebuild v3 - Clear browser cache required
+const API_BASE_URL = 'https://compliancehub-api.heizungsrechner.workers.dev';
 
 export function useApi() {
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export function useApi() {
       // Simulate upload progress
       setUploadProgress(30);
 
-      const response = await fetch(`${API_BASE}/api/validate`, {
+      const response = await fetch(`${API_BASE_URL}/api/validate`, {
         method: 'POST',
         body: formData,
       });
@@ -107,8 +107,8 @@ export function useApi() {
       setUploadProgress(30);
 
       const url = options.format === 'csv' 
-        ? `${API_BASE}/api/flatten` 
-        : `${API_BASE}/api/flatten?json=true`;
+        ? `${API_BASE_URL}/api/flatten` 
+        : `${API_BASE_URL}/api/flatten?json=true`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -163,7 +163,7 @@ export function useApi() {
 
       setUploadProgress(30);
 
-      const response = await fetch(`${API_BASE}/api/process`, {
+      const response = await fetch(`${API_BASE_URL}/api/process`, {
         method: 'POST',
         body: formData,
       });
@@ -186,7 +186,7 @@ export function useApi() {
 
   const getQuota = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/quota`);
+      const response = await fetch(`${API_BASE_URL}/api/quota`);
       const result = await handleApiResponse<{
         used: number;
         remaining: number;
