@@ -540,10 +540,12 @@ async function getQuotaInfo(userId: string, env: Env): Promise<{
     };
   }
   
+  // Get current quota record from KV
   const quotaKey = `quota:${userId}`;
   const quotaDataStr = await env.KV_QUOTA.get(quotaKey);
   
   if (!quotaDataStr) {
+    // New user
     return {
       used: 0,
       remaining: maxDaily,

@@ -53,8 +53,13 @@ export function ValidationResults({ result, onDownloadCSV, onDownloadJSON, onDow
               {valid ? 'Valid UBL Document' : 'Validation Failed'}
             </h3>
             <p className={`text-sm ${valid ? 'text-success-600' : 'text-error-600'}`}>
-              Profile: {meta.profile} | {errors.length} errors, {warnings.length} warnings, {infos.length} infos
+              Profile: <span className="font-mono font-medium">{meta.profile || 'UNKNOWN'}</span> | {errors.length} errors, {warnings.length} warnings, {infos.length} infos
             </p>
+            {meta.profile && meta.profile !== 'UNKNOWN' && (
+              <p className="text-xs text-gray-500 mt-1">
+                Detected based on CustomizationID/ProfileID in UBL header
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -85,6 +90,19 @@ export function ValidationResults({ result, onDownloadCSV, onDownloadJSON, onDow
                 style={{ width: `${meta.score}%` }}
               />
             </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>0</span>
+              <span className="text-center">ViDA Aligned: ≥80 points</span>
+              <span>100</span>
+            </div>
+          </div>
+          
+          {/* Score Explanation */}
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <p className="text-sm text-gray-600">
+              <strong>Score based on:</strong> EN 16931 validation rules (70%) + ViDA digital reporting requirements (30%). 
+              Score ≥80 indicates readiness for EU ViDA compliance.
+            </p>
           </div>
 
           {/* Checklist */}

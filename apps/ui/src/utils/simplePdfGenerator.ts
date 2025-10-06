@@ -155,15 +155,28 @@ export function generateValidationPDF(
           doc.text(`${index + 1}.`, 20, currentY);
           
           doc.setTextColor(0, 0, 0);
-          const ruleId = safeText(error.ruleId || 'N/A');
-          doc.text(`Rule: ${ruleId}`, 30, currentY);
+          const ruleId = safeText(error.id || error.ruleId || 'N/A');
+          const rulePath = safeText(error.path || 'N/A');
+          doc.text(`Rule: ${ruleId} • Path: ${rulePath}`, 30, currentY);
           
           currentY += 6;
           
           const message = safeText(error.message || error.description || 'No description');
           const lines = doc.splitTextToSize(message, 160);
           doc.text(lines, 30, currentY);
-          currentY += lines.length * 4 + 4;
+          currentY += lines.length * 4 + 2;
+          
+          // Add hint if available
+          if (error.hint) {
+            doc.setFontSize(8);
+            doc.setTextColor(0, 100, 0);
+            const hint = safeText(`Fix: ${error.hint}`);
+            const hintLines = doc.splitTextToSize(hint, 160);
+            doc.text(hintLines, 30, currentY);
+            currentY += hintLines.length * 3 + 2;
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+          }
         });
         
         currentY += 10;
@@ -193,15 +206,28 @@ export function generateValidationPDF(
           doc.text(`${index + 1}.`, 20, currentY);
           
           doc.setTextColor(0, 0, 0);
-          const ruleId = safeText(warning.ruleId || 'N/A');
-          doc.text(`Rule: ${ruleId}`, 30, currentY);
+          const ruleId = safeText(warning.id || warning.ruleId || 'N/A');
+          const rulePath = safeText(warning.path || 'N/A');
+          doc.text(`Rule: ${ruleId} • Path: ${rulePath}`, 30, currentY);
           
           currentY += 6;
           
           const message = safeText(warning.message || warning.description || 'No description');
           const lines = doc.splitTextToSize(message, 160);
           doc.text(lines, 30, currentY);
-          currentY += lines.length * 4 + 4;
+          currentY += lines.length * 4 + 2;
+          
+          // Add hint if available
+          if (warning.hint) {
+            doc.setFontSize(8);
+            doc.setTextColor(0, 100, 0);
+            const hint = safeText(`Fix: ${warning.hint}`);
+            const hintLines = doc.splitTextToSize(hint, 160);
+            doc.text(hintLines, 30, currentY);
+            currentY += hintLines.length * 3 + 2;
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+          }
         });
       }
     }
