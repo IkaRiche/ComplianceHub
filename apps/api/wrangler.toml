@@ -4,11 +4,10 @@ compatibility_date = "2025-10-06"
 # Используем новый nodejs_compat вместо node_compat
 compatibility_flags = ["nodejs_compat"]
 
-# KV namespaces - будут созданы автоматически при первом deploy
-# После создания замените на реальные ID
-# kv_namespaces = [
-#   { binding = "KV_QUOTA", id = "your-kv-quota-id", preview_id = "your-kv-quota-preview-id" }
-# ]
+# KV namespaces
+kv_namespaces = [
+  { binding = "KV_QUOTA", id = "bafd71d0b19a468ca2fb2f17f9f99f05", preview_id = "308a39a9e4b948718015821053789b8d" }
+]
 
 # Environment variables
 [vars]
