@@ -1,239 +1,177 @@
-# ViDA UBL Validator & Flattener MVP
+# 🚀 ViDA UBL Validator & Flattener
 
-A fast, secure, and compliant UBL invoice validation and flattening service built for European developers and SMBs. Validates against EN 16931 v2 and Peppol BIS 4.0 standards with ViDA Digital Reporting Requirements support.
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://github.com/yourusername/compliancehub)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![EN 16931 v2](https://img.shields.io/badge/EN%2016931-v2-blue.svg)](https://ec.europa.eu/digital-building-blocks/wikis/display/CEFDIGITAL/EN+16931+European+Standard)
+[![Peppol BIS 4.0](https://img.shields.io/badge/Peppol%20BIS-4.0-green.svg)](https://docs.peppol.eu/)
 
-## 🚀 Features
+> **Fast, secure, and ViDA-compliant UBL invoice validation for the European digital economy**
 
-### 🛡️ Validation
-- **25+ Lite Rules**: Core EN 16931 BR rules + ViDA/BIS 4.0 extensions
-- **Multiple Profiles**: UBL, XRechnung, Peppol BIS support
-- **ViDA Compliance**: Scoring (0-100) with detailed checklist
-- **Real-time Feedback**: Errors, warnings, and improvement hints
+Validate UBL invoices against EN 16931 v2 and Peppol BIS 4.0 standards with **ViDA Digital Reporting Requirements** scoring. Built for EU developers, fintech companies, and SMBs.
 
-### 📊 Flattening
-- **CSV/JSON Export**: Multiple output formats
-- **Denormalized Mode**: Repeat header in each line
-- **Tax Columns**: Pivot VAT rates as separate columns
-- **Decimal Precision**: Accurate calculations with decimal.js
+## ⚡ Live Demo
 
-### ⚡ Performance
-- **Sub-5s Processing**: p95 ≤ 5s for 1MB XML files
-- **Cloudflare Edge**: Global CDN and serverless compute
-- **No Storage**: In-memory processing for security
+🌐 **Try it now**: [compliancehub.pages.dev](https://compliancehub.pages.dev)  
+🔗 **API**: [compliancehub-api.workers.dev](https://compliancehub-api.workers.dev/health)
 
-### 🔒 Security & Compliance
-- **GDPR Compliant**: No data persistence
-- **Free Tier**: 100 validations/day
-- **Rate Limited**: Anti-abuse protection
-- **Secure Upload**: 5MB file size limit
+## 🎯 Key Features
+
+### ✅ **25 Validation Rules**
+- **EN 16931 v2**: Core business rules (BR-01 to BR-20)
+- **ViDA Extensions**: Digital Reporting Reference validation
+- **Peppol BIS 4.0**: Self-billing and enhanced document references
+- **Real-time Feedback**: Detailed error messages with fix hints
+
+### 📊 **ViDA Compliance Scoring**
+- **0-100 Score**: Automated compliance calculation
+- **≥80 = ViDA Aligned**: Ready for EU Digital Reporting
+- **5-Point Checklist**: DRR, VAT, arithmetic, reverse charge, self-billing
+- **Compliance Dashboard**: Visual scoring with actionable insights
+
+### 🔄 **Data Flattening**
+- **CSV Export**: Denormalized invoice data for analysis
+- **JSON Output**: Structured data for system integration
+- **Tax Columns**: Separate columns for each VAT rate
+- **Excel-Ready**: Direct import into spreadsheets and BI tools
+
+### ⚡ **Performance & Security**
+- **Sub-5s Processing**: p95 ≤ 5s for 1MB files
+- **No Data Storage**: GDPR-compliant in-memory processing
+- **100 Free Daily**: Generous quota for testing and development
+- **Global CDN**: Cloudflare edge computing
 
 ## 🏗️ Architecture
 
-### Monorepo Structure
 ```
-compliance-hub/
-├── apps/
-│   ├── ui/          # React + Vite UI
-│   └── api/         # Cloudflare Workers API
-├── packages/
-│   ├── core-ubl/    # Validation & flattening logic
-│   └── shared/      # Common types & utilities
-└── tests/
-    └── fixtures/    # Test UBL files
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│   React UI  │───▶│ CF Workers   │───▶│ UBL Parser  │
+│  (Vite SPA) │    │   (API)      │    │ (25 Rules)  │
+└─────────────┘    └──────────────┘    └─────────────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│ CF Pages    │    │ KV Storage   │    │ CSV/JSON    │
+│ (Static)    │    │ (Quotas)     │    │ Flattener   │
+└─────────────┘    └──────────────┘    └─────────────┘
 ```
 
-### Tech Stack
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Zustand
-- **API**: Cloudflare Workers, itty-router, KV storage
-- **Validation**: fast-xml-parser, Zod, decimal.js
-- **Build**: Vite, Turborepo, pnpm workspaces
-- **Deploy**: Cloudflare Pages + Workers
+## 🚀 Quick Deploy
 
-## 🛠️ Development
+### 1. **GitHub Setup**
+```bash
+# Clone and push to your GitHub repo
+git clone https://github.com/yourusername/compliancehub.git
+cd compliancehub
+git remote set-url origin https://github.com/yourusername/your-repo.git
+git push origin main
+```
 
-### Prerequisites
-- Node.js 18+
-- pnpm 8+
-- Cloudflare account (for deployment)
+### 2. **Cloudflare Setup**
+1. **Connect Repository** to [Cloudflare Pages](https://pages.cloudflare.com)
+2. **Build Settings**:
+   - Build command: `cd apps/ui && npm run build`
+   - Build output: `apps/ui/dist`
+   - Node version: `18`
 
-### Quick Start
+### 3. **GitHub Secrets**
+Add to repository secrets:
+```
+CLOUDFLARE_API_TOKEN = your-cloudflare-api-token
+```
+
+### 4. **Auto-Deploy**
+Push to `main` branch → GitHub Actions → Auto-deploy to Cloudflare! 🎉
+
+## 📚 API Documentation
+
+### **POST /api/validate**
+Validate UBL XML with optional ViDA scoring
+```bash
+curl -X POST https://compliancehub-api.workers.dev/api/validate \
+  -F "file=@invoice.xml" \
+  -F "vida=true"
+```
+
+### **POST /api/flatten**  
+Convert UBL to CSV/JSON
+```bash
+curl -X POST https://compliancehub-api.workers.dev/api/flatten \
+  -F "file=@invoice.xml" \
+  -F "denormalized=true"
+```
+
+### **GET /api/quota**
+Check your daily quota
+```bash
+curl https://compliancehub-api.workers.dev/api/quota
+```
+
+## 🧪 Test Files
+
+Use the included test fixtures:
+- `tests/fixtures/ubl-clean.xml` - ✅ Valid UBL (Score: 100)
+- `tests/fixtures/ubl-dirty.xml` - ❌ Multiple errors (Score: <80)
+
+## 🛠️ Local Development
+
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Start development servers
-pnpm dev
+npm run dev
 
 # Run tests
-pnpm test
+npm test
 
 # Build for production
-pnpm build
+npm run build
 ```
 
-### Development URLs
-- **UI**: http://localhost:5173
-- **API**: http://localhost:8787
+## 📋 Validation Rules
 
-### Environment Setup
-1. Copy `wrangler.toml.example` to `apps/api/wrangler.toml`
-2. Update KV namespace IDs
-3. Set environment variables
+| Rule ID | Standard | Description | Severity |
+|---------|----------|-------------|----------|
+| BR-01 | EN 16931 | Specification identifier | ERROR |
+| BR-04 | EN 16931 | Invoice issue date | ERROR |
+| BR-13 | EN 16931 | VAT exemption reason | ERROR |
+| V2-DRR-01 | ViDA | Digital Reporting Reference | WARN |
+| BIS4-SB-01 | Peppol BIS 4.0 | Self-billing indicator | WARN |
 
-## 📋 API Endpoints
-
-### POST /api/validate
-Validate UBL XML file with optional ViDA scoring.
-
-**Request**: `multipart/form-data`
-- `file`: UBL XML file (max 5MB)
-- `vida`: "true" for ViDA mode (optional)
-
-**Response**: 
-```json
-{
-  "success": true,
-  "data": {
-    "valid": true,
-    "errors": [],
-    "warnings": [],
-    "infos": [],
-    "meta": {
-      "profile": "PEPPOL",
-      "score": 100,
-      "vidaCompliant": true,
-      "checklist": [...]
-    }
-  }
-}
-```
-
-### POST /api/flatten
-Flatten UBL XML to CSV/JSON format.
-
-**Request**: `multipart/form-data`
-- `file`: UBL XML file (max 5MB)
-- `denormalized`: "true" for denormalized output
-- `taxColumns`: "true" for tax rate columns
-- `format`: "csv" | "json" (default: csv)
-
-**Response**: CSV file or JSON data
-
-### POST /api/process
-Combined validation and flattening in single request.
-
-### GET /api/quota
-Get current quota usage and limits.
-
-## 🧪 Testing
-
-### Test Fixtures
-- `ubl-clean.xml`: Valid UBL invoice (score: 100)
-- `ubl-dirty.xml`: Invalid UBL with multiple errors
-
-### Running Tests
-```bash
-# All tests
-pnpm test
-
-# Package-specific tests
-cd packages/core-ubl
-pnpm test
-```
-
-### Coverage
-Target: 80%+ test coverage for core validation logic.
-
-## 🚀 Deployment
-
-### Cloudflare Setup
-1. Create KV namespace: `wrangler kv:namespace create "KV_QUOTA"`
-2. Update `wrangler.toml` with namespace ID
-3. Deploy API: `cd apps/api && pnpm deploy`
-4. Deploy UI: `cd apps/ui && pnpm deploy`
-
-### Production URLs
-- **API**: `https://compliancehub-api.your-domain.workers.dev`
-- **UI**: `https://compliancehub.pages.dev`
-
-### Monitoring
-- Cloudflare Analytics for usage metrics
-- Worker logs for error tracking
-- KV storage for quota management
-
-## 📜 Validation Rules
-
-### Core EN 16931 Rules (BR-01 to BR-20)
-- Document structure validation
-- Required fields checking  
-- Arithmetic calculations
-- VAT handling
-- Party information
-
-### ViDA Extensions (V2-*)
-- Digital Reporting Reference (DRR)
-- Enhanced reverse charge validation
-- Digital signature readiness
-
-### Peppol BIS 4.0 Preview (BIS4-*)
-- Self-billing indicators
-- Enhanced document references
+[📖 View all 25 rules](docs/validation-rules.md)
 
 ## 🎯 ViDA Compliance
 
-### Scoring Algorithm
-- **Errors**: -10 points each
-- **Warnings**: -2 points each
-- **Base Score**: 100 points
-- **ViDA Aligned**: Score ≥ 80
+The **ViDA (ViDA in the EU)** initiative requires:
+- ✅ **EN 16931 v2** compliance (September 2025)
+- ✅ **Digital Reporting References** (DRR fields)
+- ✅ **B2G mandatory** from January 2025
+- ✅ **Enhanced VAT handling** for cross-border
 
-### Checklist Items
-1. ✅ Digital Reporting Reference (DRR-01)
-2. ✅ VAT Exemption Reasons
-3. ✅ Arithmetic Calculations
-4. ✅ Reverse Charge Handling
-5. ✅ Self-billing Flags
+**ComplianceHub ensures your invoices are ViDA-ready!**
 
 ## 🤝 Contributing
 
-### Development Guidelines
-1. Follow TypeScript strict mode
-2. Write tests for new features
-3. Use conventional commits
-4. Update documentation
-
-### Git Workflow
-```bash
-# Feature development
-git checkout -b feature/new-validation-rule
-git commit -m "feat: add BR-XX validation rule"
-git push origin feature/new-validation-rule
-```
-
-## 📊 Performance Targets
-
-- **Validation**: p95 ≤ 5s for 1MB files
-- **Accuracy**: 90%+ fixture validation match
-- **Availability**: 99.9% uptime
-- **Quota**: 100 free validations/day
-
-## 🆘 Support
-
-### Common Issues
-1. **Large Files**: Max 5MB limit
-2. **Quota Exceeded**: Wait for daily reset
-3. **Validation Errors**: Check rule hints
-
-### Contact
-- Issues: GitHub Issues
-- Documentation: `/docs` 
-- Email: support@compliancehub.dev
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/new-rule`
+3. Commit changes: `git commit -m "feat: add BR-XX validation"`
+4. Push branch: `git push origin feature/new-rule`
+5. Open Pull Request
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- 📖 **Documentation**: [/docs](docs/)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/compliancehub/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/compliancehub/discussions)
+- 📧 **Email**: support@compliancehub.dev
 
 ---
 
-**Built for the EU ViDA ecosystem** 🇪🇺  
-Compatible with EN 16931 v2, Peppol BIS 4.0, and XRechnung standards.
+**Built for the European ViDA ecosystem** 🇪🇺  
+*Compatible with EN 16931 v2, Peppol BIS 4.0, and XRechnung standards*
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://github.com/yourusername/compliancehub)
