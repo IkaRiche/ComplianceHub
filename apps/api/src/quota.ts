@@ -27,6 +27,16 @@ export async function checkQuota(userId: string, env: Env): Promise<{
   const now = new Date();
   const today = now.toISOString().split('T')[0];
   
+  // Check if KV is available (может не быть на первом деплое)
+  if (!env.KV_QUOTA) {
+    console.warn('KV_QUOTA not available, allowing request');
+    return {
+      allowed: true,
+      remaining: maxDaily - 1,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  }
+  
   // Get current quota record
   const quotaKey = `quota:${userId}`;
   const quotaDataStr = await env.KV_QUOTA.get(quotaKey);
@@ -80,6 +90,15 @@ export async function getQuotaInfo(userId: string, env: Env): Promise<{
   const maxDaily = parseInt(env.FREE_QUOTA_DAILY || '100');
   const now = new Date();
   const today = now.toISOString().split('T')[0];
+  
+  // Check if KV is available
+  if (!env.KV_QUOTA) {
+    return {
+      used: 0,
+      remaining: maxDaily,
+      resetAt: getNextResetDate(now).toISOString(),
+    };
+  }
   
   const quotaKey = `quota:${userId}`;
   const quotaDataStr = await env.KV_QUOTA.get(quotaKey);

@@ -16,4 +16,8 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: true,
   },
+  define: {
+    // Для продакшена API будет на другом домене
+    __API_URL__: JSON.stringify(process.env.VITE_API_URL || '/api'),
+  },
 });

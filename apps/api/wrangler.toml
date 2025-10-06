@@ -1,12 +1,14 @@
-name = "compliance-hub-api"
+name = "compliancehub-api"
 main = "src/index.ts"
 compatibility_date = "2025-10-06"
-node_compat = true
+# Используем новый nodejs_compat вместо node_compat
+compatibility_flags = ["nodejs_compat"]
 
-# KV for quota management
-kv_namespaces = [
-  { binding = "KV_QUOTA", id = "your-kv-quota-id", preview_id = "your-kv-quota-preview-id" }
-]
+# KV namespaces - будут созданы автоматически при первом deploy
+# После создания замените на реальные ID
+# kv_namespaces = [
+#   { binding = "KV_QUOTA", id = "your-kv-quota-id", preview_id = "your-kv-quota-preview-id" }
+# ]
 
 # Environment variables
 [vars]
@@ -14,9 +16,16 @@ API_VERSION = "2025-10-06"
 MAX_FILE_SIZE = "5242880"  # 5MB
 FREE_QUOTA_DAILY = "100"
 
-# CORS configuration
+# Production environment
 [env.production]
-name = "compliance-hub-api"
+name = "compliancehub-api"
+# kv_namespaces = [
+#   { binding = "KV_QUOTA", id = "production-kv-quota-id" }
+# ]
 
+# Staging environment  
 [env.staging]
-name = "compliance-hub-api-staging"
+name = "compliancehub-api-staging"
+# kv_namespaces = [
+#   { binding = "KV_QUOTA", id = "staging-kv-quota-id" }
+# ]

@@ -98,4 +98,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: apps/ui
-          command: pages deploy dist --project-name=compliance-hub-ui
+          command: pages deploy dist --project-name=compliancehub

@@ -153,8 +153,8 @@ Target: 80%+ test coverage for core validation logic.
 4. Deploy UI: `cd apps/ui && pnpm deploy`
 
 ### Production URLs
-- **API**: `https://compliance-hub-api.your-domain.workers.dev`
-- **UI**: `https://compliance-hub.pages.dev`
+- **API**: `https://compliancehub-api.your-domain.workers.dev`
+- **UI**: `https://compliancehub.pages.dev`
 
 ### Monitoring
 - Cloudflare Analytics for usage metrics
