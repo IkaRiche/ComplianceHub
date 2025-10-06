@@ -471,8 +471,8 @@ async function checkQuota(userId: string, env: Env): Promise<{ allowed: boolean;
   };
 }
 
-// Create router
-const router = Router();
+// Create router with base path
+const router = Router({ base: '/api' });
 
 // CORS headers
 const corsHeaders = {
@@ -534,8 +534,25 @@ router.get('/health', (request: Request, env: Env) => {
   });
 });
 
+// Get quota information
+router.get('/quota', async (request: Request, env: Env) => {
+  try {
+    const userId = getUserId(request);
+    const quotaCheck = await checkQuota(userId, env);
+    
+    return createResponse({
+      used: 100 - quotaCheck.remaining, // Calculate used from remaining
+      remaining: quotaCheck.remaining,
+      resetAt: quotaCheck.resetAt,
+    });
+  } catch (error) {
+    console.error('Quota check error:', error);
+    return createResponse('Failed to check quota', 500, env);
+  }
+});
+
 // Validate UBL XML
-router.post('/api/validate', async (request: Request, env: Env) => {
+router.post('/validate', async (request: Request, env: Env) => {
   try {
     // Check quota
     const userId = getUserId(request);
@@ -566,6 +583,139 @@ router.post('/api/validate', async (request: Request, env: Env) => {
   } catch (error) {
     console.error('Validation error:', error);
     return createResponse(error instanceof Error ? error.message : 'Validation failed', 500, env);
+  }
+});
+
+// Flatten UBL to CSV/JSON
+router.post('/flatten', async (request: Request, env: Env) => {
+  try {
+    // Check quota
+    const userId = getUserId(request);
+    const quotaCheck = await checkQuota(userId, env);
+    
+    if (!quotaCheck.allowed) {
+      return createResponse('Quota exceeded', 429, env, quotaCheck);
+    }
+
+    // Parse form data
+    const { file, formData } = await parseMultipartFile(request);
+    
+    // Check file size
+    const maxSize = parseInt(env.MAX_FILE_SIZE || '5242880');
+    if (file.size > maxSize) {
+      return createResponse(`File too large. Maximum size: ${maxSize} bytes`, 400, env, quotaCheck);
+    }
+
+    // Get options
+    const denormalized = formData.get('denormalized') === 'true';
+    const taxColumns = formData.get('taxColumns') === 'true';
+    const format = (formData.get('format') as 'csv' | 'json') || 'csv';
+    const returnJson = new URL(request.url).searchParams.get('json') === 'true';
+    
+    // Read XML content
+    const xmlContent = await file.text();
+    
+    // Simple CSV flattening (basic implementation)
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+      textNodeName: '#text',
+    });
+    
+    const parsed = parser.parse(xmlContent);
+    const invoice = parsed.Invoice;
+    
+    if (returnJson || format === 'json') {
+      return createResponse({
+        invoice: {
+          id: invoice['cbc:ID'],
+          issueDate: invoice['cbc:IssueDate'],
+          currency: invoice['cbc:DocumentCurrencyCode'],
+          seller: invoice['cac:AccountingSupplierParty']?.['cac:Party']?.['cac:PartyName']?.['cbc:Name'],
+          buyer: invoice['cac:AccountingCustomerParty']?.['cac:Party']?.['cac:PartyName']?.['cbc:Name'],
+          total: invoice['cac:LegalMonetaryTotal']?.['cbc:PayableAmount']?.['#text'] || invoice['cac:LegalMonetaryTotal']?.['cbc:PayableAmount']
+        }
+      }, 200, env, quotaCheck);
+    } else {
+      // Return CSV as file download
+      const csvContent = `Invoice ID,Issue Date,Currency,Seller,Buyer,Total\n"${invoice['cbc:ID'] || ''}","${invoice['cbc:IssueDate'] || ''}","${invoice['cbc:DocumentCurrencyCode'] || ''}","${invoice['cac:AccountingSupplierParty']?.['cac:Party']?.['cac:PartyName']?.['cbc:Name'] || ''}","${invoice['cac:AccountingCustomerParty']?.['cac:Party']?.['cac:PartyName']?.['cbc:Name'] || ''}","${invoice['cac:LegalMonetaryTotal']?.['cbc:PayableAmount']?.['#text'] || invoice['cac:LegalMonetaryTotal']?.['cbc:PayableAmount'] || ''}"`;
+      
+      return new Response(csvContent, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': `attachment; filename="invoice_${Date.now()}.csv"`,
+          ...corsHeaders,
+        },
+      });
+    }
+    
+  } catch (error) {
+    console.error('Flattening error:', error);
+    return createResponse(error instanceof Error ? error.message : 'Flattening failed', 500, env);
+  }
+});
+
+// Combined validate + flatten
+router.post('/process', async (request: Request, env: Env) => {
+  try {
+    // Check quota (counts as 2 operations)
+    const userId = getUserId(request);
+    const quotaCheck1 = await checkQuota(userId, env);
+    if (!quotaCheck1.allowed) {
+      return createResponse('Quota exceeded', 429, env, quotaCheck1);
+    }
+    
+    const quotaCheck2 = await checkQuota(userId, env);
+    if (!quotaCheck2.allowed) {
+      return createResponse('Quota exceeded', 429, env, quotaCheck2);
+    }
+
+    // Parse form data
+    const { file, formData } = await parseMultipartFile(request);
+    
+    const maxSize = parseInt(env.MAX_FILE_SIZE || '5242880');
+    if (file.size > maxSize) {
+      return createResponse(`File too large. Maximum size: ${maxSize} bytes`, 400, env, quotaCheck2);
+    }
+
+    const xmlContent = await file.text();
+    
+    // Get options
+    const vida = formData.get('vida') === 'true';
+    
+    // Validate
+    const validation = await validateUbl(xmlContent, vida);
+    
+    // Basic flattening
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+      textNodeName: '#text',
+    });
+    
+    const parsed = parser.parse(xmlContent);
+    const invoice = parsed.Invoice;
+    
+    const flattened = {
+      invoice: {
+        id: invoice['cbc:ID'],
+        issueDate: invoice['cbc:IssueDate'],
+        currency: invoice['cbc:DocumentCurrencyCode'],
+        seller: invoice['cac:AccountingSupplierParty']?.['cac:Party']?.['cac:PartyName']?.['cbc:Name'],
+        buyer: invoice['cac:AccountingCustomerParty']?.['cac:Party']?.['cac:PartyName']?.['cbc:Name'],
+        total: invoice['cac:LegalMonetaryTotal']?.['cbc:PayableAmount']?.['#text'] || invoice['cac:LegalMonetaryTotal']?.['cbc:PayableAmount']
+      }
+    };
+    
+    return createResponse({
+      validation,
+      flattened,
+    }, 200, env, quotaCheck2);
+    
+  } catch (error) {
+    console.error('Processing error:', error);
+    return createResponse(error instanceof Error ? error.message : 'Processing failed', 500, env);
   }
 });
 
