@@ -27,10 +27,10 @@ export default function App() {
     clearError,
   } = useApi();
 
-  // Load quota on mount
+  // Load quota on mount - only once
   useEffect(() => {
     getQuota();
-  }, [getQuota]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFileUpload = async (file: File) => {
     try {

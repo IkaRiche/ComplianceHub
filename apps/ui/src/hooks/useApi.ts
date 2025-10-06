@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ValidationResult, FlattenResult } from '@compliance-hub/shared';
 import { useAppStore } from '../store/appStore.js';
 
@@ -16,14 +16,17 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// Force rebuild v3 - Clear browser cache required
+// Force rebuild v4 - Fix quota caching issue
 const API_BASE_URL = 'https://compliancehub-api.heizungsrechner.workers.dev';
+
+// Global cache outside the hook to persist between renders
+let quotaCache: { data: any; timestamp: number } | null = null;
 
 export function useApi() {
   const [error, setError] = useState<string | null>(null);
   const { setQuota, setLoading, setUploadProgress } = useAppStore();
 
-  const handleApiResponse = async <T>(response: Response): Promise<T> => {
+  const handleApiResponse = useCallback(async <T>(response: Response): Promise<T> => {
     if (!response.ok) {
       if (response.status === 429) {
         throw new Error('Quota exceeded. Please try again later.');
@@ -48,7 +51,7 @@ export function useApi() {
     }
 
     return data.data as T;
-  };
+  }, [setQuota]);
 
   const validateFile = async (file: File, vida: boolean = false): Promise<ValidationResult> => {
     setError(null);
@@ -184,14 +187,12 @@ export function useApi() {
     }
   };
 
-  // Cache quota for 30 seconds to reduce API calls
-  let quotaCache: { data: any; timestamp: number } | null = null;
-  
-  const getQuota = async () => {
+  const getQuota = useCallback(async () => {
     const now = Date.now();
     
     // Return cached data if less than 30 seconds old
     if (quotaCache && (now - quotaCache.timestamp) < 30000) {
+      setQuota(quotaCache.data); // Still update store with cached data
       return quotaCache.data;
     }
     
@@ -212,7 +213,7 @@ export function useApi() {
       console.warn('Failed to fetch quota:', err);
       return null;
     }
-  };
+  }, [setQuota]);
 
   return {
     error,
