@@ -290,7 +290,7 @@ export default function App() {
                     <div>curl -X POST -F "file=@invoice.xml" \</div>
                     <div className="pl-4">-F "vida=true" \</div>
                     <div className="pl-4 text-blue-300">https://compliancehub-api.heizungsrechner.workers.dev/api/validate</div>
-                    <div className="mt-2 text-green-400"># Response: {"{'success':true,'data':{'score':80,'aligned':true}}"}</div>
+                    <div className="mt-2 text-green-400"># Response: {"{'success':true,'data':{'valid':false,'meta':{'score':48}}}"}</div>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">
