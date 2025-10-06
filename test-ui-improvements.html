@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Improvements Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 10px; padding: 10px 20px; background: #007acc; color: white; border: none; border-radius: 5px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe0e0; border: 1px solid #ff0000; }
+        .success { background: #e0ffe0; border: 1px solid #00aa00; }
+        pre { font-size: 12px; max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>ViDA UBL UI Improvements Test</h1>
+    
+    <div>
+        <h2>Test PDF Generation with Rule ID/XPath</h2>
+        <p>This tests the improved PDF generation with proper Rule ID and XPath display.</p>
+        <button onclick="testPDFGeneration()">Generate Test PDF</button>
+        <div id="pdf-result" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>Test Validation with Mock Data</h2>
+        <p>This shows the improved validation results UI with profile detection and ViDA score explanation.</p>
+        <button onclick="testValidationUI()">Show Validation Results</button>
+        <div id="validation-result" class="result"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // Mock validation result with proper structure
+        const mockValidationResult = {
+            valid: false,
+            errors: [
+                {
+                    id: "BR-01",
+                    severity: "ERROR", 
+                    path: "/Invoice/cbc:CustomizationID",
+                    message: "Missing Specification identifier",
+                    hint: "Add UBL profile ID (e.g., urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_1.0:2022-01-01)"
+                },
+                {
+                    id: "BR-11",
+                    severity: "ERROR",
+                    path: "/Invoice/cac:LegalMonetaryTotal",
+                    message: "Line nets ≠ Tax exclusive amount",
+                    hint: "Recalculate: sum(InvoiceLine/LineExtensionAmount) = LegalMonetaryTotal/TaxExclusiveAmount"
+                },
+                {
+                    id: "BR-12",
+                    severity: "ERROR", 
+                    path: "/Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount",
+                    message: "Payable amount formula incorrect",
+                    hint: "Ensure taxExclusiveAmount + taxAmount = payableAmount"
+                }
+            ],
+            warnings: [
+                {
+                    id: "V2-DRR-01",
+                    severity: "WARN",
+                    path: "/Invoice/cbc:ReportingRef",
+                    message: "Missing ViDA digital reporting reference", 
+                    hint: "Add reporting reference for ViDA compliance (EU Directive 2025)"
+                }
+            ],
+            infos: [],
+            meta: {
+                profile: "PEPPOL",
+                score: 48,
+                vidaCompliant: false,
+                checklist: [
+                    { id: "DRR-01", status: "FAIL", hint: "Digital reporting reference missing", severity: "WARN" },
+                    { id: "VAT-01", status: "OK", hint: "VAT structure valid", severity: "INFO" },
+                    { id: "STRUCT-01", status: "FAIL", hint: "Required fields missing", severity: "ERROR" }
+                ]
+            }
+        };
+
+        // Helper to safely render text (simplified version)
+        function safeText(text) {
+            if (!text) return '';
+            return text
+                .replace(/[""]/g, '"')    
+                .replace(/['']/g, "'")    
+                .replace(/–/g, '-')       
+                .replace(/—/g, '--')      
+                .replace(/…/g, '...')     
+                .replace(/✓/g, '[OK]')    
+                .replace(/✗/g, '[X]')     
+                .replace(/[^\x00-\x7F]/g, '?'); 
+        }
+
+        function testPDFGeneration() {
+            const resultDiv = document.getElementById('pdf-result');
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Header
+                doc.setFontSize(18);
+                doc.text('ViDA UBL Validation Report', 20, 25);
+                
+                // Metadata
+                doc.setFontSize(10);
+                doc.text(\`Generated: \${new Date().toLocaleString()}\`, 20, 35);
+                doc.text('Profile: EN 16931 v2 & Peppol BIS 4.0', 20, 42);
+                
+                // Status
+                doc.setFontSize(14);
+                doc.text('Status: FAILED [X]', 20, 55);
+                
+                // Errors with new format
+                doc.setFontSize(12);
+                doc.text('Errors (3)', 20, 70);
+                
+                let currentY = 80;
+                mockValidationResult.errors.forEach((error, index) => {
+                    doc.setFontSize(9);
+                    doc.text(\`\${index + 1}.\`, 20, currentY);
+                    
+                    // New format: Rule ID + Path
+                    const ruleId = safeText(error.id || 'N/A');
+                    const rulePath = safeText(error.path || 'N/A');
+                    doc.text(\`Rule: \${ruleId} • Path: \${rulePath}\`, 30, currentY);
+                    
+                    currentY += 6;
+                    
+                    const message = safeText(error.message || 'No description');
+                    const lines = doc.splitTextToSize(message, 160);
+                    doc.text(lines, 30, currentY);
+                    currentY += lines.length * 4 + 2;
+                    
+                    // Add hint 
+                    if (error.hint) {
+                        doc.setFontSize(8);
+                        const hint = safeText(\`Fix: \${error.hint}\`);
+                        const hintLines = doc.splitTextToSize(hint, 160);
+                        doc.text(hintLines, 30, currentY);
+                        currentY += hintLines.length * 3 + 6;
+                        doc.setFontSize(9);
+                    }
+                });
+                
+                // Save PDF
+                doc.save('vida-test-report-improved.pdf');
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = '<strong>✅ PDF Generated Successfully!</strong><br>Check your downloads folder for "vida-test-report-improved.pdf"<br><br>Key improvements:<br>• Rule ID properly displayed (BR-01, BR-11, BR-12)<br>• XPath included for each rule<br>• "Fix" hints added below each error<br>• Better formatting and spacing';
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = \`<strong>❌ PDF Generation Failed:</strong><br>\${error.message}\`;
+            }
+        }
+
+        function testValidationUI() {
+            const resultDiv = document.getElementById('validation-result');
+            
+            // Simulate the enhanced ValidationResults component
+            const html = \`
+            <div style="background: #fef2f2; border: 2px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="color: #dc2626;">❌</span>
+                    <div>
+                        <h3 style="color: #dc2626; font-size: 18px; font-weight: 600; margin: 0;">Validation Failed</h3>
+                        <p style="color: #dc2626; font-size: 14px; margin: 4px 0 0 0;">
+                            Profile: <span style="font-family: monospace; font-weight: 500;">PEPPOL</span> | 3 errors, 1 warnings, 0 infos
+                        </p>
+                        <p style="color: #6b7280; font-size: 12px; margin: 4px 0 0 0;">
+                            Detected based on CustomizationID/ProfileID in UBL header
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px;">
+                <div style="display: flex; align-items: center; justify-between; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color: #f59e0b;">🏆</span>
+                        <h3 style="color: #111827; font-size: 18px; font-weight: 600; margin: 0;">ViDA Compliance Score</h3>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #111827; font-size: 24px; font-weight: bold;">48/100</div>
+                    </div>
+                </div>
+
+                <!-- Score Bar -->
+                <div style="margin-bottom: 16px;">
+                    <div style="width: 100%; background: #e5e7eb; border-radius: 6px; height: 12px;">
+                        <div style="height: 12px; border-radius: 6px; background: #dc2626; width: 48%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #6b7280; font-size: 12px; margin-top: 4px;">
+                        <span>0</span>
+                        <span>ViDA Aligned: ≥80 points</span>
+                        <span>100</span>
+                    </div>
+                </div>
+                
+                <!-- Score Explanation -->
+                <div style="background: #f9fafb; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                    <p style="color: #4b5563; font-size: 14px; margin: 0;">
+                        <strong>Score based on:</strong> EN 16931 validation rules (70%) + ViDA digital reporting requirements (30%). 
+                        Score ≥80 indicates readiness for EU ViDA compliance.
+                    </p>
+                </div>
+
+                <!-- Checklist -->
+                <div>
+                    <h4 style="color: #111827; font-weight: 500; margin: 0 0 8px 0;">ViDA Checklist</h4>
+                    <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 4px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626;">
+                        <span>❌</span>
+                        <div>
+                            <strong>DRR-01:</strong> FAIL
+                            <div style="font-size: 12px; color: #6b7280;">Digital reporting reference missing</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 4px; border: 1px solid #d1fae5; background: #ecfdf5; color: #059669;">
+                        <span>✅</span>
+                        <div>
+                            <strong>VAT-01:</strong> OK
+                            <div style="font-size: 12px; color: #6b7280;">VAT structure valid</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 4px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626;">
+                        <span>❌</span>
+                        <div>
+                            <strong>STRUCT-01:</strong> FAIL
+                            <div style="font-size: 12px; color: #6b7280;">Required fields missing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            \`;
+            
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = '<strong>✅ Enhanced UI Preview:</strong><br><br>' + html;
+        }
+        
+        // Show validation UI by default
+        window.onload = () => {
+            testValidationUI();
+        };
+    </script>
+</body>
+</html>

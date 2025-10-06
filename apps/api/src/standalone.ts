@@ -246,8 +246,8 @@ const liteRules: Rule[] = [
       }
     },
     path: '/Invoice/cac:LegalMonetaryTotal',
-    message: 'Sum of line net amounts does not equal tax exclusive amount',
-    hint: 'Recalculate sum(lineExtensionAmount) = taxExclusiveAmount',
+    message: 'Line nets ≠ Tax exclusive amount',
+    hint: 'Recalculate: sum(InvoiceLine/LineExtensionAmount) = LegalMonetaryTotal/TaxExclusiveAmount',
   },
   {
     id: 'BR-12',
@@ -263,8 +263,8 @@ const liteRules: Rule[] = [
         return false;
       }
     },
-    path: '/Invoice/cac:LegalMonetaryTotal',
-    message: 'Payable amount calculation error',
+    path: '/Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount',
+    message: 'Payable amount formula incorrect',
     hint: 'Ensure taxExclusiveAmount + taxAmount = payableAmount',
   },
 
@@ -285,8 +285,8 @@ const liteRules: Rule[] = [
       );
     },
     path: '/Invoice/cac:TaxTotal/cac:TaxSubtotal',
-    message: '0% VAT rate missing exemption reason',
-    hint: 'BT-121 Tax exemption reason is required for 0% VAT',
+    message: '0% VAT without exemption reason',
+    hint: 'For VAT 0% add ExemptionReason/Code (BT-121)',
   },
 
   // Additional validation rules continue...
