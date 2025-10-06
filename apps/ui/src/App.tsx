@@ -168,7 +168,7 @@ export default function App() {
     if (!validationResult) return;
     
     try {
-      const { generateValidationPDF } = await import('./utils/pdfGenerator.js');
+      const { generateValidationPDF } = await import('./utils/simplePdfGenerator.js');
       generateValidationPDF(validationResult, {
         filename: `vida-validation-report-${Date.now()}.pdf`,
         includeDetailedErrors: true,
