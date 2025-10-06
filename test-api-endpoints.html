@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 10px; padding: 10px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe0e0; border: 1px solid #ff0000; }
+        .success { background: #e0ffe0; border: 1px solid #00aa00; }
+    </style>
+</head>
+<body>
+    <h1>ViDA UBL API Endpoint Test</h1>
+    
+    <div>
+        <h2>1. Health Check</h2>
+        <button onclick="testHealth()">Test /api/health</button>
+        <div id="health-result" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>2. Quota Check</h2>
+        <button onclick="testQuota()">Test /api/quota</button>
+        <div id="quota-result" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>3. Validate Endpoint</h2>
+        <button onclick="testValidate()">Test /api/validate (with sample UBL)</button>
+        <div id="validate-result" class="result"></div>
+    </div>
+    
+    <div>
+        <h2>4. Flatten Endpoint</h2>
+        <button onclick="testFlatten()">Test /api/flatten (with sample UBL)</button>
+        <div id="flatten-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://compliancehub-api.heizungsrechner.workers.dev/api';
+        
+        // Sample UBL XML for testing
+        const SAMPLE_UBL = `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+    <cbc:ID>INV-001</cbc:ID>
+    <cbc:IssueDate>2025-01-01</cbc:IssueDate>
+    <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cac:PartyName>
+                <cbc:Name>Test Supplier</cbc:Name>
+            </cac:PartyName>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cac:PartyName>
+                <cbc:Name>Test Customer</cbc:Name>
+            </cac:PartyName>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+    <cac:LegalMonetaryTotal>
+        <cbc:PayableAmount currencyID="EUR">100.00</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+</Invoice>`;
+
+        function displayResult(elementId, result, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+            element.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                displayResult('health-result', data, response.ok);
+            } catch (error) {
+                displayResult('health-result', { error: error.message }, false);
+            }
+        }
+
+        async function testQuota() {
+            try {
+                const response = await fetch(`${API_BASE}/quota`);
+                const data = await response.json();
+                displayResult('quota-result', data, response.ok);
+            } catch (error) {
+                displayResult('quota-result', { error: error.message }, false);
+            }
+        }
+
+        async function testValidate() {
+            try {
+                const formData = new FormData();
+                formData.append('file', new Blob([SAMPLE_UBL], { type: 'application/xml' }), 'test-invoice.xml');
+                formData.append('userId', 'test-user-validate');
+                
+                const response = await fetch(`${API_BASE}/validate`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                displayResult('validate-result', data, response.ok);
+            } catch (error) {
+                displayResult('validate-result', { error: error.message }, false);
+            }
+        }
+
+        async function testFlatten() {
+            try {
+                const formData = new FormData();
+                formData.append('file', new Blob([SAMPLE_UBL], { type: 'application/xml' }), 'test-invoice.xml');
+                formData.append('userId', 'test-user-flatten');
+                
+                const response = await fetch(`${API_BASE}/flatten`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                displayResult('flatten-result', data, response.ok);
+            } catch (error) {
+                displayResult('flatten-result', { error: error.message }, false);
+            }
+        }
+
+        // Auto-run health check on page load
+        window.onload = () => {
+            testHealth();
+        };
+    </script>
+</body>
+</html>

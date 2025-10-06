@@ -630,6 +630,23 @@ async function parseMultipartFile(request: Request): Promise<{ file: File; formD
 
 // Routes
 
+// Base API info endpoint
+router.get('/', (request: Request, env: Env) => {
+  return createResponse({
+    name: 'ViDA UBL Validator & Flattener API',
+    version: env.API_VERSION || '2025-10-06',
+    description: 'EU/DE UBL Invoice validation with EN 16931 v2 and Peppol BIS 4.0 compliance',
+    endpoints: {
+      health: 'GET /api/health',
+      quota: 'GET /api/quota',
+      validate: 'POST /api/validate',
+      flatten: 'POST /api/flatten',
+      process: 'POST /api/process'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check
 router.get('/health', (request: Request, env: Env) => {
   return createResponse({ 
@@ -645,10 +662,21 @@ router.get('/quota', async (request: Request, env: Env) => {
     const userId = getUserId(request);
     const quotaInfo = await getQuotaInfo(userId, env);
     
+    // Debug logging
+    console.log('Quota debug:', {
+      userId: userId.slice(0, 8) + '...',
+      kvAvailable: !!env.KV_QUOTA,
+      quotaInfo
+    });
+    
     return createResponse({
       used: quotaInfo.used,
       remaining: quotaInfo.remaining,
       resetAt: quotaInfo.resetAt,
+      debug: {
+        userId: userId.slice(0, 8) + '...',
+        kvStatus: env.KV_QUOTA ? 'available' : 'not_available'
+      }
     });
   } catch (error) {
     console.error('Quota check error:', error);
