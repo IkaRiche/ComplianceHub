@@ -1,5 +1,5 @@
 name = "compliancehub-api"
-main = "src/index.ts"
+main = "src/standalone.ts"
 compatibility_date = "2025-10-06"
 # Используем новый nodejs_compat вместо node_compat
 compatibility_flags = ["nodejs_compat"]

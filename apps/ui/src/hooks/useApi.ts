@@ -60,7 +60,7 @@ export function useApi() {
       // Simulate upload progress
       setUploadProgress(30);
 
-      const response = await fetch('/api/validate', {
+      const response = await fetch('https://compliancehub-api.heizungsrechner.workers.dev/api/validate', {
         method: 'POST',
         body: formData,
       });
@@ -104,8 +104,8 @@ export function useApi() {
       setUploadProgress(30);
 
       const url = options.format === 'csv' 
-        ? '/api/flatten' 
-        : '/api/flatten?json=true';
+        ? 'https://compliancehub-api.heizungsrechner.workers.dev/api/flatten' 
+        : 'https://compliancehub-api.heizungsrechner.workers.dev/api/flatten?json=true';
 
       const response = await fetch(url, {
         method: 'POST',
@@ -160,7 +160,7 @@ export function useApi() {
 
       setUploadProgress(30);
 
-      const response = await fetch('/api/process', {
+      const response = await fetch('https://compliancehub-api.heizungsrechner.workers.dev/api/process', {
         method: 'POST',
         body: formData,
       });
@@ -183,7 +183,7 @@ export function useApi() {
 
   const getQuota = async () => {
     try {
-      const response = await fetch('/api/quota');
+      const response = await fetch('https://compliancehub-api.heizungsrechner.workers.dev/api/quota');
       const result = await handleApiResponse<{
         used: number;
         remaining: number;
