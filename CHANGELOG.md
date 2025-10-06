@@ -2,7 +2,7 @@
 
 All notable changes to ComplianceHub will be documented in this file.
 
-## [2025-10-06] - Production Ready MVP
+## [2025-10-06] - Production Ready MVP + PDF Encoding Fix
 
 ### ✨ Added
 - **PDF Report Generation**: Professional compliance reports with jsPDF
@@ -20,6 +20,13 @@ All notable changes to ComplianceHub will be documented in this file.
   - UBL-specific guidance for users
 
 ### 🔧 Fixed
+- **PDF UTF-8 Encoding Issues**: Resolved garbled text in compliance reports
+  - Created dedicated pdfGenerator utility with proper character handling
+  - Implemented safeText() function to sanitize problematic UTF-8 characters
+  - Replaced Unicode symbols (✓✗) with ASCII-safe alternatives ([OK]/[X])
+  - Added jspdf-autotable for professional table formatting
+  - Enhanced font selection (Times) for better character support
+  - **Result**: Clean "Status: FAILED [X]" instead of "�S�t�a�t�u�s�: �F�A�I�L�E�D"
 - **Infinite Quota Requests**: Resolved React useEffect dependency loop
   - Removed getQuota from useEffect dependencies
   - Implemented global quota cache (30-second TTL)
@@ -40,9 +47,10 @@ All notable changes to ComplianceHub will be documented in this file.
   - Reduced bundle size with code splitting
 
 ### 📦 Dependencies
-- Added `jspdf` for client-side PDF generation
+- Added `jspdf` + `jspdf-autotable` for professional PDF generation
 - Updated React components with enhanced error handling
 - Optimized build process with Vite bundling
+- Enhanced UTF-8 text processing utilities
 
 ## [Previous Versions] - MVP Development
 
