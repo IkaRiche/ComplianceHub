@@ -26,6 +26,24 @@ export function UploadDropzone({ onFileSelect, disabled = false }: UploadDropzon
     maxFiles: 1,
     maxSize: 5 * 1024 * 1024, // 5MB
     disabled: disabled || isLoading,
+    onDropRejected: (rejectedFiles) => {
+      // Enhanced error messages for better UX
+      rejectedFiles.forEach(rejection => {
+        const errors = rejection.errors.map(err => {
+          switch (err.code) {
+            case 'file-invalid-type':
+              return 'Please upload XML files only (UBL Invoice, XRechnung, Peppol BIS)';
+            case 'file-too-large':
+              return 'File too large. Maximum size is 5MB';
+            case 'too-many-files':
+              return 'Please upload one file at a time';
+            default:
+              return err.message;
+          }
+        });
+        console.warn('File rejected:', rejection.file.name, errors);
+      });
+    },
   });
 
   const hasRejections = fileRejections.length > 0;
@@ -90,11 +108,28 @@ export function UploadDropzone({ onFileSelect, disabled = false }: UploadDropzon
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-4 w-4 text-error-500" />
               <div className="text-sm text-error-700">
+                <strong>Upload Error:</strong>
                 {fileRejections.map(({ file, errors }) => (
-                  <div key={file.name}>
-                    <strong>{file.name}:</strong> {errors.map(e => e.message).join(', ')}
+                  <div key={file.name} className="mt-1">
+                    <span className="font-medium">{file.name}</span>: {
+                      errors.map(err => {
+                        switch (err.code) {
+                          case 'file-invalid-type':
+                            return 'Please upload XML files only (UBL Invoice, XRechnung, Peppol BIS)';
+                          case 'file-too-large':
+                            return 'File too large. Maximum size is 5MB';
+                          case 'too-many-files':
+                            return 'Please upload one file at a time';
+                          default:
+                            return err.message;
+                        }
+                      }).join(', ')
+                    }
                   </div>
                 ))}
+                <div className="mt-2 text-xs text-error-600">
+                  💡 Tip: UBL XML invoices typically contain &lt;Invoice&gt; tags and are used for EN 16931 compliance.
+                </div>
               </div>
             </div>
           </div>

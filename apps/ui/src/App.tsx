@@ -37,6 +37,23 @@ export default function App() {
       clearError();
       reset();
       
+      // Additional file validation with friendly messages
+      if (!file.name.toLowerCase().endsWith('.xml')) {
+        throw new Error('Please upload UBL XML files only. Supported formats: .xml');
+      }
+      
+      // Check for common UBL indicators in filename (optional but helpful)
+      const fileName = file.name.toLowerCase();
+      const isLikelyUBL = fileName.includes('invoice') || 
+                         fileName.includes('ubl') || 
+                         fileName.includes('rechnung') ||
+                         fileName.includes('factur');
+      
+      if (!isLikelyUBL && file.size < 1024) {
+        // Small non-UBL-looking files are likely wrong
+        console.warn('File might not be UBL invoice:', file.name);
+      }
+      
       // Process file (validate + flatten)
       const result = await processFile(file, {
         vida: vidaMode,
@@ -78,6 +95,116 @@ export default function App() {
     document.body.removeChild(link);
     
     URL.revokeObjectURL(url);
+  };
+
+  const downloadPDF = async () => {
+    if (!validationResult) return;
+    
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(20);
+      doc.text('ViDA UBL Validation Report', 20, 30);
+      
+      doc.setFontSize(12);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 45);
+      doc.text(`Profile: EN 16931 v2 & Peppol BIS 4.0`, 20, 55);
+      
+      // Overall Status
+      doc.setFontSize(16);
+      doc.text('Validation Summary', 20, 75);
+      
+      doc.setFontSize(12);
+      const statusText = validationResult.valid ? '✓ PASSED' : '✗ FAILED';
+      const statusColor = validationResult.valid ? [0, 128, 0] : [255, 0, 0];
+      doc.setTextColor(...statusColor);
+      doc.text(`Status: ${statusText}`, 20, 90);
+      doc.setTextColor(0, 0, 0);
+      
+      doc.text(`Errors: ${validationResult.errors?.length || 0}`, 20, 105);
+      doc.text(`Warnings: ${validationResult.warnings?.length || 0}`, 20, 115);
+      
+      // ViDA Compliance
+      if (validationResult.vida) {
+        doc.setFontSize(16);
+        doc.text('ViDA Compliance Score', 20, 135);
+        
+        doc.setFontSize(12);
+        const scoreText = `${validationResult.vida.score}/100`;
+        const alignedText = validationResult.vida.aligned ? '(ViDA Aligned)' : '(Not ViDA Aligned)';
+        doc.text(`Score: ${scoreText} ${alignedText}`, 20, 150);
+        
+        // Checklist
+        if (validationResult.vida.checklist) {
+          let yPos = 165;
+          validationResult.vida.checklist.forEach((item, index) => {
+            const status = item.passed ? '✓' : '✗';
+            const color = item.passed ? [0, 128, 0] : [255, 0, 0];
+            doc.setTextColor(...color);
+            doc.text(`${status}`, 20, yPos);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`${item.title}`, 30, yPos);
+            yPos += 10;
+          });
+        }
+      }
+      
+      // Add new page for detailed issues if needed
+      if ((validationResult.errors?.length || 0) > 0 || (validationResult.warnings?.length || 0) > 0) {
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.text('Detailed Issues', 20, 30);
+        
+        let yPos = 50;
+        
+        // Errors
+        if (validationResult.errors?.length) {
+          doc.setFontSize(14);
+          doc.setTextColor(255, 0, 0);
+          doc.text('Errors:', 20, yPos);
+          doc.setTextColor(0, 0, 0);
+          yPos += 15;
+          
+          validationResult.errors.forEach((error, index) => {
+            doc.setFontSize(10);
+            const lines = doc.splitTextToSize(`${error.ruleId}: ${error.message}`, 170);
+            doc.text(lines, 20, yPos);
+            yPos += lines.length * 5 + 5;
+          });
+        }
+        
+        // Warnings
+        if (validationResult.warnings?.length) {
+          doc.setFontSize(14);
+          doc.setTextColor(255, 165, 0);
+          doc.text('Warnings:', 20, yPos + 10);
+          doc.setTextColor(0, 0, 0);
+          yPos += 25;
+          
+          validationResult.warnings.forEach((warning, index) => {
+            doc.setFontSize(10);
+            const lines = doc.splitTextToSize(`${warning.ruleId}: ${warning.message}`, 170);
+            doc.text(lines, 20, yPos);
+            yPos += lines.length * 5 + 5;
+          });
+        }
+      }
+      
+      // Footer
+      const pageCount = doc.internal.pages.length - 1;
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.text('ComplianceHub • ViDA UBL Validator • compliancehub.pages.dev', 20, 285);
+      }
+      
+      doc.save(`vida-validation-report-${Date.now()}.pdf`);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      alert('PDF generation failed. Please try again.');
+    }
   };
 
   return (
@@ -138,6 +265,7 @@ export default function App() {
                 result={validationResult}
                 onDownloadCSV={handleDownloadCSV}
                 onDownloadJSON={downloadJSON}
+                onDownloadPDF={downloadPDF}
               />
             ) : (
               <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
@@ -176,12 +304,44 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              ComplianceHub MVP • Built for DE/EU developers and SMBs
+          <div className="space-y-6">
+            {/* API Integration Section */}
+            <div className="border-b border-gray-200 pb-6">
+              <details className="group">
+                <summary className="cursor-pointer hover:text-primary-600 font-medium text-gray-700">
+                  🔗 API Integration • Automate UBL validation in your apps
+                </summary>
+                <div className="mt-4 space-y-3">
+                  <div className="bg-gray-900 rounded-lg p-4 text-sm font-mono text-gray-100 overflow-x-auto">
+                    <div className="text-green-400"># Validate UBL with ViDA scoring</div>
+                    <div>curl -X POST -F "file=@invoice.xml" \</div>
+                    <div className="pl-4">-F "vida=true" \</div>
+                    <div className="pl-4 text-blue-300">https://compliancehub-api.heizungsrechner.workers.dev/api/validate</div>
+                    <div className="mt-2 text-green-400"># Response: {"{'success':true,'data':{'score':80,'aligned':true}}"}</div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">
+                      Free tier: 100 requests/day • No auth required
+                    </span>
+                    <a 
+                      href="mailto:api@compliancehub.dev?subject=Beta API Access" 
+                      className="text-primary-600 hover:text-primary-700 font-medium"
+                    >
+                      Beta API Key? Email us →
+                    </a>
+                  </div>
+                </div>
+              </details>
             </div>
-            <div className="text-sm text-gray-500">
-              v2025-10-06 • EN 16931 v2 & Peppol BIS 4.0
+            
+            {/* Main Footer */}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                ComplianceHub MVP • Built for DE/EU developers and SMBs
+              </div>
+              <div className="text-sm text-gray-500">
+                v2025-10-06 • EN 16931 v2 & Peppol BIS 4.0
+              </div>
             </div>
           </div>
         </div>

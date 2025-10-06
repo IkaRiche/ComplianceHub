@@ -1,14 +1,16 @@
 import React from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, Award, Download } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Info, Award, Download, FileText } from 'lucide-react';
 import { ValidationResult } from '@compliance-hub/shared';
+import { jsPDF } from 'jspdf';
 
 interface ValidationResultsProps {
   result: ValidationResult;
   onDownloadCSV?: () => void;
   onDownloadJSON?: () => void;
+  onDownloadPDF?: () => void;
 }
 
-export function ValidationResults({ result, onDownloadCSV, onDownloadJSON }: ValidationResultsProps) {
+export function ValidationResults({ result, onDownloadCSV, onDownloadJSON, onDownloadPDF }: ValidationResultsProps) {
   const { valid, errors, warnings, infos, meta } = result;
   
   const getSeverityIcon = (severity: string) => {
@@ -174,31 +176,42 @@ export function ValidationResults({ result, onDownloadCSV, onDownloadJSON }: Val
       )}
 
       {/* Download Actions */}
-      {valid && (onDownloadCSV || onDownloadJSON) && (
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Download Flattened Data</h3>
-          <div className="flex space-x-3">
-            {onDownloadCSV && (
-              <button
-                onClick={onDownloadCSV}
-                className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download CSV</span>
-              </button>
-            )}
-            {onDownloadJSON && (
-              <button
-                onClick={onDownloadJSON}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download JSON</span>
-              </button>
-            )}
-          </div>
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3">Export Results</h3>
+        <div className="flex flex-wrap gap-3">
+          {/* PDF Report - Always available */}
+          <button
+            onClick={onDownloadPDF}
+            className="flex items-center space-x-2 px-4 py-2 bg-error-600 text-white rounded-md hover:bg-error-700 transition-colors"
+          >
+            <FileText className="h-4 w-4" />
+            <span>PDF Report</span>
+          </button>
+          
+          {/* CSV/JSON only when valid */}
+          {valid && onDownloadCSV && (
+            <button
+              onClick={onDownloadCSV}
+              className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span>Download CSV</span>
+            </button>
+          )}
+          {valid && onDownloadJSON && (
+            <button
+              onClick={onDownloadJSON}
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span>Download JSON</span>
+            </button>
+          )}
         </div>
-      )}
+        <p className="text-xs text-gray-500 mt-2">
+          💡 PDF reports are perfect for compliance audits and sharing with stakeholders
+        </p>
+      </div>
     </div>
   );
 }
