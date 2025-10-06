@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Tool</title>
+    <style>
+        body { font-family: monospace; margin: 20px; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+        .result { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; white-space: pre-wrap; }
+        .error { background: #ffe0e0; border: 1px solid #ff0000; }
+        .success { background: #e0ffe0; border: 1px solid #00aa00; }
+        .warning { background: #fff3cd; border: 1px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <h1>🔧 ViDA API Debug Tool</h1>
+    
+    <div>
+        <h2>🩺 API Status Check</h2>
+        <button onclick="testBaseAPI()">Test Base API (/api/)</button>
+        <button onclick="testHealth()">Test Health</button>
+        <button onclick="testQuota()">Test Quota (Debug)</button>
+        <div id="status-result" class="result"></div>
+    </div>
+
+    <div>
+        <h2>📊 Quota Testing</h2>
+        <button onclick="simulateQuotaUsage()">Simulate API Usage (5 calls)</button>
+        <button onclick="checkQuotaMultiple()">Check Quota Multiple Times</button>
+        <div id="quota-result" class="result"></div>
+    </div>
+
+    <div>
+        <h2>🧪 Validation Test</h2>
+        <button onclick="testValidation()">Test Validation (Should use quota)</button>
+        <div id="validation-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://compliancehub-api.heizungsrechner.workers.dev/api';
+        
+        function displayResult(elementId, title, result, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.textContent = `${title}\n${JSON.stringify(result, null, 2)}`;
+        }
+
+        async function testBaseAPI() {
+            try {
+                const response = await fetch(`${API_BASE}/`);
+                const data = await response.json();
+                displayResult('status-result', '📍 Base API Response:', data, response.ok ? 'success' : 'error');
+            } catch (error) {
+                displayResult('status-result', '❌ Base API Error:', {error: error.message}, 'error');
+            }
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                displayResult('status-result', '💚 Health Check:', data, response.ok ? 'success' : 'error');
+            } catch (error) {
+                displayResult('status-result', '❌ Health Error:', {error: error.message}, 'error');
+            }
+        }
+
+        async function testQuota() {
+            try {
+                const response = await fetch(`${API_BASE}/quota`);
+                const data = await response.json();
+                displayResult('quota-result', '📊 Quota Info:', data, 'info');
+            } catch (error) {
+                displayResult('quota-result', '❌ Quota Error:', {error: error.message}, 'error');
+            }
+        }
+
+        async function checkQuotaMultiple() {
+            const results = [];
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const response = await fetch(`${API_BASE}/quota`);
+                    const data = await response.json();
+                    results.push(`Call ${i+1}: used=${data.data?.used || 'N/A'}, remaining=${data.data?.remaining || 'N/A'}`);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                } catch (error) {
+                    results.push(`Call ${i+1}: ERROR - ${error.message}`);
+                }
+            }
+            displayResult('quota-result', '🔄 Multiple Quota Checks:', {calls: results}, 'warning');
+        }
+
+        async function simulateQuotaUsage() {
+            displayResult('quota-result', '⏳ Starting quota usage simulation...', {}, 'warning');
+            
+            const sampleUBL = `<?xml version="1.0"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">TEST-001</cbc:ID>
+</Invoice>`;
+
+            const results = [];
+            for (let i = 0; i < 5; i++) {
+                try {
+                    // First check quota
+                    const quotaBefore = await fetch(`${API_BASE}/quota`);
+                    const quotaBeforeData = await quotaBefore.json();
+                    
+                    // Then make API call
+                    const formData = new FormData();
+                    formData.append('file', new Blob([sampleUBL], { type: 'application/xml' }), 'test.xml');
+                    formData.append('userId', `debug-user-${Date.now()}-${i}`);
+                    
+                    const validateResponse = await fetch(`${API_BASE}/validate`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const validateData = await validateResponse.json();
+                    
+                    // Check quota after
+                    const quotaAfter = await fetch(`${API_BASE}/quota`);
+                    const quotaAfterData = await quotaAfter.json();
+                    
+                    results.push({
+                        call: i + 1,
+                        quotaBefore: quotaBeforeData.data?.remaining || 'N/A',
+                        quotaAfter: quotaAfterData.data?.remaining || 'N/A',
+                        validationSuccess: validateResponse.ok
+                    });
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } catch (error) {
+                    results.push({
+                        call: i + 1,
+                        error: error.message
+                    });
+                }
+            }
+            displayResult('quota-result', '🎯 Quota Usage Simulation Results:', {results}, 'info');
+        }
+
+        async function testValidation() {
+            const sampleUBL = `<?xml version="1.0"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+    <cbc:ID xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">TEST-001</cbc:ID>
+</Invoice>`;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', new Blob([sampleUBL], { type: 'application/xml' }), 'test.xml');
+                formData.append('userId', `debug-user-${Date.now()}`);
+                
+                const response = await fetch(`${API_BASE}/validate`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                displayResult('validation-result', '🧪 Validation Test:', data, response.ok ? 'success' : 'error');
+            } catch (error) {
+                displayResult('validation-result', '❌ Validation Error:', {error: error.message}, 'error');
+            }
+        }
+
+        // Auto-run basic checks on load
+        window.onload = () => {
+            testBaseAPI();
+            setTimeout(testHealth, 1000);
+            setTimeout(testQuota, 2000);
+        };
+    </script>
+</body>
+</html>
