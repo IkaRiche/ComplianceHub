@@ -72,12 +72,79 @@ export default function App() {
     if (!validationResult) return;
     
     try {
-      // Get the current file from the dropzone (we'd need to store this)
-      // For now, show a message that they need to re-upload
-      alert('Please re-upload your file and select CSV download during processing.');
+      // Generate CSV from validation results
+      const csvData = generateCSVFromValidationResult(validationResult);
+      
+      const blob = new Blob([csvData], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `validation_result_${Date.now()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('CSV download error:', err);
+      alert('CSV generation failed. Please try JSON download instead.');
     }
+  };
+
+  // Helper function to generate CSV from validation results
+  const generateCSVFromValidationResult = (result: any) => {
+    const rows = [];
+    
+    // Header
+    rows.push(['Field', 'Value', 'Type']);
+    
+    // Basic info
+    rows.push(['Status', result.valid ? 'PASSED' : 'FAILED', 'Status']);
+    rows.push(['Error Count', result.errors?.length || 0, 'Count']);
+    rows.push(['Warning Count', result.warnings?.length || 0, 'Count']);
+    rows.push(['Info Count', result.infos?.length || 0, 'Count']);
+    
+    // ViDA info
+    if (result.vida) {
+      rows.push(['ViDA Score', result.vida.score || 0, 'Score']);
+      rows.push(['ViDA Aligned', result.vida.aligned ? 'YES' : 'NO', 'Status']);
+    }
+    
+    // Add empty row
+    rows.push(['', '', '']);
+    
+    // Errors
+    if (result.errors?.length) {
+      rows.push(['ERRORS', '', '']);
+      rows.push(['Rule ID', 'Message', 'Type']);
+      result.errors.forEach((error: any) => {
+        rows.push([
+          error.ruleId || 'N/A',
+          error.message || error.description || 'No description',
+          'ERROR'
+        ]);
+      });
+      rows.push(['', '', '']);
+    }
+    
+    // Warnings  
+    if (result.warnings?.length) {
+      rows.push(['WARNINGS', '', '']);
+      rows.push(['Rule ID', 'Message', 'Type']);
+      result.warnings.forEach((warning: any) => {
+        rows.push([
+          warning.ruleId || 'N/A',
+          warning.message || warning.description || 'No description',
+          'WARNING'
+        ]);
+      });
+    }
+    
+    // Convert to CSV format
+    return rows.map(row => 
+      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
   };
 
   const downloadJSON = () => {

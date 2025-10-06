@@ -174,42 +174,62 @@ export function ValidationResults({ result, onDownloadCSV, onDownloadJSON, onDow
         </div>
       )}
 
-      {/* Download Actions */}
+      {/* Export Results - Always Available */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-3">Export Results</h3>
         <div className="flex flex-wrap gap-3">
-          {/* PDF Report - Always available */}
+          {/* PDF Report - For compliance & audits */}
           <button
             onClick={onDownloadPDF}
-            className="flex items-center space-x-2 px-4 py-2 bg-error-600 text-white rounded-md hover:bg-error-700 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
           >
             <FileText className="h-4 w-4" />
             <span>PDF Report</span>
           </button>
           
-          {/* CSV/JSON only when valid */}
-          {valid && onDownloadCSV && (
+          {/* CSV - For developers & data analysis */}
+          {onDownloadCSV && (
             <button
               onClick={onDownloadCSV}
-              className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
             >
               <Download className="h-4 w-4" />
-              <span>Download CSV</span>
+              <span>CSV Data</span>
             </button>
           )}
-          {valid && onDownloadJSON && (
+          
+          {/* JSON - For API integration */}
+          {onDownloadJSON && (
             <button
               onClick={onDownloadJSON}
-              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               <Download className="h-4 w-4" />
-              <span>Download JSON</span>
+              <span>JSON Data</span>
             </button>
           )}
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          💡 PDF reports are perfect for compliance audits and sharing with stakeholders
-        </p>
+        
+        <div className="mt-3 text-xs text-gray-600 space-y-1">
+          <div className="flex items-center space-x-4">
+            <span className="flex items-center space-x-1">
+              <FileText className="h-3 w-3 text-red-600" />
+              <span>PDF: Compliance reports & stakeholder sharing</span>
+            </span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="flex items-center space-x-1">
+              <Download className="h-3 w-3 text-green-600" />
+              <span>CSV: Excel analysis & BI integration</span>
+            </span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="flex items-center space-x-1">
+              <Download className="h-3 w-3 text-blue-600" />
+              <span>JSON: API integration & automation</span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
