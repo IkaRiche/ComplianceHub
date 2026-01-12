@@ -44,7 +44,7 @@ export function OfficialReport() {
                             <p className="text-gray-400 mt-2">One-time payment. No subscription required.</p>
                         </div>
                         <a
-                            href="https://buy.stripe.com/PLACEHOLDER_STRIPE_LINK?source=validator_ui_report_page"
+                            href="https://buy.stripe.com/00w00jefu8Gje7Q0bvfQI00?source=official_report_page"
                             className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition-colors flex items-center gap-2"
                         >
                             <Download className="h-5 w-5" />

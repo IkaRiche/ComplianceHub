@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@compliance-hub/shared": "*",
+    "@tailwindcss/typography": "^0.5.19",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.294.0",

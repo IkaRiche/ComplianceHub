@@ -12,33 +12,37 @@ import { VidaValidator } from './pages/VidaValidator.js';
 import { En16931Validation } from './pages/En16931Validation.js';
 import { OfficialReport } from './pages/OfficialReport.js';
 import { Faq } from './pages/Faq.js';
+import { ThemeProvider } from './context/ThemeContext.js';
+import { Layout } from './components/Layout.js';
 
 export default function App() {
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Core App */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/validator" element={<ValidatorPage />} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Core App */}
+            <Route path="/" element={<Layout><LandingPage /></Layout>} />
+            <Route path="/validator" element={<ValidatorPage />} />
 
-          {/* Trust Pages */}
-          <Route path="/api-docs" element={<ApiDocs />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/pricing" element={<Pricing />} />
+            {/* Trust Pages */}
+            <Route path="/api-docs" element={<Layout><ApiDocs /></Layout>} />
+            <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
+            <Route path="/terms" element={<Layout><Terms /></Layout>} />
+            <Route path="/security" element={<Layout><Security /></Layout>} />
+            <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
 
-          {/* SEO Pages */}
-          <Route path="/vida-validator" element={<VidaValidator />} />
-          <Route path="/en-16931-validation" element={<En16931Validation />} />
-          <Route path="/official-compliance-report" element={<OfficialReport />} />
-          <Route path="/faq" element={<Faq />} />
+            {/* SEO Pages */}
+            <Route path="/vida-validator" element={<Layout><VidaValidator /></Layout>} />
+            <Route path="/en-16931-validation" element={<Layout><En16931Validation /></Layout>} />
+            <Route path="/official-compliance-report" element={<Layout><OfficialReport /></Layout>} />
+            <Route path="/faq" element={<Layout><Faq /></Layout>} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </HelmetProvider>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </HelmetProvider >
   );
 }

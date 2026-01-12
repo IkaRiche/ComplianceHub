@@ -11,56 +11,27 @@ export function LandingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
             <SEOHead
                 title="ViDA UBL Validator - Official EU Compliance Tool"
                 description="Validate UBL invoices against EN 16931 and ViDA standards. Official compliance reports, API access, and GDPR-safe processing."
                 canonical="/"
             />
 
-            {/* Header */}
-            <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-blue-600 rounded-lg">
-                                <FileText className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-gray-900">ViDA UBL Validator</h1>
-                                <p className="text-xs text-gray-500">by BauKlar</p>
-                            </div>
-                        </div>
-                        <nav className="flex items-center space-x-6">
-                            <Link to="/pricing" className="text-gray-600 hover:text-gray-900 font-medium">Pricing</Link>
-                            <Link to="/api-docs" className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1">
-                                API Docs <ExternalLink className="h-3 w-3" />
-                            </Link>
-                            <button
-                                onClick={handleTryFree}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                            >
-                                Try Free
-                            </button>
-                        </nav>
-                    </div>
-                </div>
-            </header>
-
             {/* Hero Section */}
             <section className="py-20 px-4">
                 <div className="max-w-4xl mx-auto text-center">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-6">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-sm font-medium mb-6">
                         <Shield className="h-4 w-4 mr-2" />
                         EN 16931 v2 & Peppol BIS 4.0 Compliant
                     </div>
 
-                    <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                         Official ViDA / EN 16931 Validation for
-                        <span className="text-blue-600"> UBL Invoices</span>
+                        <span className="text-blue-600 dark:text-blue-400"> UBL Invoices</span>
                     </h1>
 
-                    <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                    <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto">
                         Developer-grade compliance utility for ERP, e-Invoicing, FinTech, and Peppol integrations.
                         Stateless API with official compliance reports.
                     </p>
@@ -75,7 +46,7 @@ export function LandingPage() {
                         </button>
                         <Link
                             to="/api-docs"
-                            className="bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all flex items-center gap-2"
+                            className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center gap-2"
                         >
                             <Code className="h-5 w-5" />
                             API Documentation
@@ -83,7 +54,7 @@ export function LandingPage() {
                     </div>
 
                     {/* Quick features */}
-                    <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+                    <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600 dark:text-gray-400">
                         <div className="flex items-center gap-2">
                             <Check className="h-4 w-4 text-green-500" />
                             No file storage
@@ -101,10 +72,10 @@ export function LandingPage() {
             </section>
 
             {/* Who is this for */}
-            <section className="py-16 px-4 bg-gray-50">
+            <section className="py-16 px-4 bg-gray-50 dark:bg-gray-900/50">
                 <div className="max-w-6xl mx-auto">
-                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">Who is this for?</h2>
-                    <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">Who is this for?</h2>
+                    <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
                         Built for developers and compliance engineers who need reliable, fast UBL validation
                     </p>
 
@@ -115,12 +86,12 @@ export function LandingPage() {
                             { icon: CreditCard, title: 'FinTech (VAT/Payments)', desc: 'Pre-validate for tax reporting' },
                             { icon: Code, title: 'System Integrators', desc: 'Peppol network compliance' },
                         ].map((item, i) => (
-                            <div key={i} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                                <div className="p-3 bg-blue-50 rounded-lg w-fit mb-4">
-                                    <item.icon className="h-6 w-6 text-blue-600" />
+                            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg w-fit mb-4">
+                                    <item.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                                 </div>
-                                <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                                <p className="text-sm text-gray-600">{item.desc}</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{item.title}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
                             </div>
                         ))}
                     </div>
@@ -128,59 +99,59 @@ export function LandingPage() {
             </section>
 
             {/* Pricing */}
-            <section id="pricing" className="py-20 px-4">
+            <section id="pricing" className="py-20 px-4 dark:bg-gray-900">
                 <div className="max-w-6xl mx-auto">
-                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">Simple, usage-based pricing</h2>
-                    <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">Simple, usage-based pricing</h2>
+                    <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
                         Start free, scale as you grow. No subscriptions in code — just API keys and quotas.
                     </p>
 
                     {/* API Packages */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                         {/* Free */}
-                        <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 relative">
-                            <h3 className="font-bold text-xl text-gray-900 mb-2">Free</h3>
-                            <p className="text-4xl font-bold text-gray-900 mb-1">€0</p>
-                            <p className="text-sm text-gray-500 mb-6">10 validations/day</p>
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 relative">
+                            <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Free</h3>
+                            <p className="text-4xl font-bold text-gray-900 dark:text-white mb-1">€0</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">10 validations/day</p>
                             <ul className="space-y-3 mb-6">
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     ViDA Score
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     Errors & warnings
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-400 line-through">
+                                <li className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-600 line-through">
                                     CSV/JSON export
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-400 line-through">
+                                <li className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-600 line-through">
                                     PDF reports
                                 </li>
                             </ul>
                             <button
                                 onClick={handleTryFree}
-                                className="w-full py-3 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                className="w-full py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                             >
                                 Start Free
                             </button>
                         </div>
 
                         {/* Starter */}
-                        <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 relative">
-                            <h3 className="font-bold text-xl text-gray-900 mb-2">Starter</h3>
-                            <p className="text-4xl font-bold text-gray-900 mb-1">€49<span className="text-lg font-normal text-gray-500">/mo</span></p>
-                            <p className="text-sm text-gray-500 mb-6">1,000 validations/mo</p>
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 relative">
+                            <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Starter</h3>
+                            <p className="text-4xl font-bold text-gray-900 dark:text-white mb-1">€49<span className="text-lg font-normal text-gray-500 dark:text-gray-400">/mo</span></p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">1,000 validations/mo</p>
                             <ul className="space-y-3 mb-6">
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     Everything in Free
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     CSV/JSON export
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     API key access
                                 </li>
@@ -224,27 +195,27 @@ export function LandingPage() {
                         </div>
 
                         {/* Scale */}
-                        <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 relative">
-                            <h3 className="font-bold text-xl text-gray-900 mb-2">Scale</h3>
-                            <p className="text-4xl font-bold text-gray-900 mb-1">€799<span className="text-lg font-normal text-gray-500">/mo</span></p>
-                            <p className="text-sm text-gray-500 mb-6">50,000 validations/mo</p>
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 relative">
+                            <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">Scale</h3>
+                            <p className="text-4xl font-bold text-gray-900 dark:text-white mb-1">€799<span className="text-lg font-normal text-gray-500 dark:text-gray-400">/mo</span></p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">50,000 validations/mo</p>
                             <ul className="space-y-3 mb-6">
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     Everything in Growth
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     Dedicated support
                                 </li>
-                                <li className="flex items-center gap-2 text-sm text-gray-600">
+                                <li className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                     <Check className="h-4 w-4 text-green-500" />
                                     Custom integrations
                                 </li>
                             </ul>
                             <a
                                 href="mailto:api@bauklar.com?subject=Scale API Key Request"
-                                className="block w-full py-3 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center"
+                                className="block w-full py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-center"
                             >
                                 Contact Sales
                             </a>
@@ -252,23 +223,23 @@ export function LandingPage() {
                     </div>
 
                     {/* One-off Product */}
-                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-200">
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-amber-200 dark:border-amber-800">
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                             <div>
-                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-medium mb-3">
+                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-sm font-medium mb-3">
                                     <FileText className="h-4 w-4 mr-2" />
                                     One-off Product
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                                     Official ViDA / EN 16931 Compliance Audit
                                 </h3>
-                                <p className="text-gray-600 max-w-xl">
+                                <p className="text-gray-600 dark:text-gray-300 max-w-xl">
                                     Signed PDF report with file hash, timestamp, detailed checklist, and executive summary.
                                     Perfect for audits and compliance documentation.
                                 </p>
                             </div>
                             <div className="text-center md:text-right">
-                                <p className="text-4xl font-bold text-gray-900 mb-2">€99<span className="text-lg font-normal text-gray-500">/file</span></p>
+                                <p className="text-4xl font-bold text-gray-900 dark:text-white mb-2">€99<span className="text-lg font-normal text-gray-500 dark:text-gray-400">/file</span></p>
                                 <Link
                                     to="/official-compliance-report"
                                     className="inline-block px-6 py-3 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors"
@@ -304,27 +275,6 @@ export function LandingPage() {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="py-12 px-4 border-t border-gray-200">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-600 rounded-lg">
-                            <FileText className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-gray-900">ViDA UBL Validator</p>
-                            <p className="text-sm text-gray-500">by BauKlar</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-6 text-sm text-gray-600">
-                        <Link to="/api-docs" className="hover:text-gray-900">API Docs</Link>
-                        <a href="mailto:api@bauklar.com" className="hover:text-gray-900">Contact</a>
-                        <Link to="/privacy" className="hover:text-gray-900">Privacy</Link>
-                        <Link to="/terms" className="hover:text-gray-900">Terms</Link>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }

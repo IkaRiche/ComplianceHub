@@ -4,7 +4,7 @@ import { ValidationResult } from '@compliance-hub/shared';
 
 // URLs for upgrade
 const PRICING_URL = 'https://vida.bauklar.com/pricing';
-const REPORT_PAYMENT_URL = 'https://buy.stripe.com/PLACEHOLDER_STRIPE_LINK';
+const REPORT_PAYMENT_URL = 'https://buy.stripe.com/00w00jefu8Gje7Q0bvfQI00?source=validator_ui';
 
 interface ValidationResultsProps {
   result: ValidationResult;
@@ -224,8 +224,8 @@ export function ValidationResults({
           <button
             onClick={onDownloadPDF}
             className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${isFreeTier
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600'
-                : 'bg-red-600 text-white hover:bg-red-700'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600'
+              : 'bg-red-600 text-white hover:bg-red-700'
               }`}
           >
             <FileText className="h-4 w-4" />
@@ -238,8 +238,8 @@ export function ValidationResults({
             <button
               onClick={onDownloadCSV}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${isFreeTier
-                  ? 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
-                  : 'bg-green-600 text-white hover:bg-green-700'
+                ? 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
+                : 'bg-green-600 text-white hover:bg-green-700'
                 }`}
             >
               {isFreeTier ? <Lock className="h-4 w-4" /> : <Download className="h-4 w-4" />}
@@ -252,8 +252,8 @@ export function ValidationResults({
             <button
               onClick={onDownloadJSON}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${isFreeTier
-                  ? 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
             >
               {isFreeTier ? <Lock className="h-4 w-4" /> : <Download className="h-4 w-4" />}

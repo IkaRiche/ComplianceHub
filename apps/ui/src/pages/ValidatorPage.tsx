@@ -7,9 +7,10 @@ import { QuotaDisplay } from '../components/QuotaDisplay.js';
 import { useAppStore } from '../store/appStore.js';
 import { useApi } from '../hooks/useApi.js';
 import { SEOHead } from '../components/SEOHead.js';
+import { ThemeToggle } from '../components/ThemeToggle.js';
 
 // Stripe Payment Link for €99 report
-const REPORT_PAYMENT_URL = 'https://buy.stripe.com/PLACEHOLDER_STRIPE_LINK?source=validator_ui';
+const REPORT_PAYMENT_URL = 'https://buy.stripe.com/00w00jefu8Gje7Q0bvfQI00?source=validator_ui';
 const PRICING_URL = '/pricing';
 
 export function ValidatorPage() {
@@ -198,7 +199,7 @@ export function ValidatorPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             <SEOHead
                 title="ViDA UBL Validator Tool - Free Online Validation"
                 description="Validate UBL XML invoices against EN 16931 and ViDA standards. Immediate feedback, secure processing."
@@ -206,7 +207,7 @@ export function ValidatorPage() {
             />
 
             {/* Header */}
-            <header className="bg-white border-b border-gray-200">
+            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-3">
@@ -215,27 +216,28 @@ export function ValidatorPage() {
                                     <FileText className="h-6 w-6 text-white" />
                                 </div>
                                 <div>
-                                    <h1 className="text-xl font-bold text-gray-900">ViDA UBL Validator</h1>
-                                    <p className="text-xs text-gray-500">by BauKlar • vida.bauklar.com</p>
+                                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">ViDA UBL Validator</h1>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">by BauKlar • vida.bauklar.com</p>
                                 </div>
                             </a>
                         </div>
                         <div className="flex items-center space-x-4">
                             {/* Tier badge */}
                             <div className={`px-3 py-1 rounded-full text-sm font-medium ${userTier === 'free'
-                                ? 'bg-gray-100 text-gray-600'
-                                : 'bg-blue-100 text-blue-700'
+                                ? 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                                 }`}>
                                 {userTier === 'free' ? 'Free Tier' : `${userTier.charAt(0).toUpperCase() + userTier.slice(1)} Plan`}
                             </div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                                 <Shield className="h-4 w-4 text-green-500" />
-                                <span>Secure</span>
+                                <span className="hidden sm:inline">Secure</span>
                             </div>
-                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                                 <Zap className="h-4 w-4 text-amber-500" />
-                                <span>Fast</span>
+                                <span className="hidden sm:inline">Fast</span>
                             </div>
+                            <ThemeToggle />
                         </div>
                     </div>
                 </div>
@@ -274,12 +276,12 @@ export function ValidatorPage() {
                     {/* Right Column - Results */}
                     <div className="lg:col-span-2">
                         {error && (
-                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/10 dark:border-red-800">
                                 <div className="flex items-center space-x-2">
                                     <AlertCircle className="h-5 w-5 text-red-500" />
                                     <div>
-                                        <h3 className="font-medium text-red-700">Error</h3>
-                                        <p className="text-sm text-red-600 mt-1">{error}</p>
+                                        <h3 className="font-medium text-red-700 dark:text-red-400">Error</h3>
+                                        <p className="text-sm text-red-600 dark:text-red-300 mt-1">{error}</p>
                                     </div>
                                 </div>
                             </div>
@@ -294,31 +296,31 @@ export function ValidatorPage() {
                                 userTier={userTier}
                             />
                         ) : (
-                            <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-                                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
+                                <FileText className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
                                     Ready to validate your UBL invoice
                                 </h3>
-                                <p className="text-gray-600 max-w-md mx-auto">
+                                <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
                                     Upload a UBL XML invoice to get started with validation.
                                     Enable ViDA mode for compliance scoring against EU Digital Reporting Requirements.
                                 </p>
 
                                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto text-sm">
-                                    <div className="p-4 bg-blue-50 rounded-lg">
-                                        <Shield className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                                        <div className="font-medium text-blue-700">25+ Validation Rules</div>
-                                        <div className="text-blue-600">EN 16931 v2, Peppol BIS 4.0</div>
+                                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                        <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                                        <div className="font-medium text-blue-700 dark:text-blue-300">25+ Validation Rules</div>
+                                        <div className="text-blue-600 dark:text-blue-400">EN 16931 v2, Peppol BIS 4.0</div>
                                     </div>
-                                    <div className="p-4 bg-green-50 rounded-lg">
-                                        <FileText className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                                        <div className="font-medium text-green-700">ViDA Score</div>
-                                        <div className="text-green-600">0-100 compliance rating</div>
+                                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                        <FileText className="h-6 w-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                                        <div className="font-medium text-green-700 dark:text-green-300">ViDA Score</div>
+                                        <div className="text-green-600 dark:text-green-400">0-100 compliance rating</div>
                                     </div>
-                                    <div className="p-4 bg-amber-50 rounded-lg">
-                                        <Zap className="h-6 w-6 text-amber-600 mx-auto mb-2" />
-                                        <div className="font-medium text-amber-700">Fast & Secure</div>
-                                        <div className="text-amber-600">No file storage</div>
+                                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                                        <Zap className="h-6 w-6 text-amber-600 dark:text-amber-400 mx-auto mb-2" />
+                                        <div className="font-medium text-amber-700 dark:text-amber-300">Fast & Secure</div>
+                                        <div className="text-amber-600 dark:text-amber-400">No file storage</div>
                                     </div>
                                 </div>
                             </div>
@@ -328,13 +330,13 @@ export function ValidatorPage() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-white border-t border-gray-200 mt-16">
+            <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="space-y-6">
                         {/* API Integration Section */}
-                        <div className="border-b border-gray-200 pb-6">
+                        <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
                             <details className="group">
-                                <summary className="cursor-pointer hover:text-blue-600 font-medium text-gray-700">
+                                <summary className="cursor-pointer hover:text-blue-600 font-medium text-gray-700 dark:text-gray-300">
                                     🔗 API Integration • Automate UBL validation in your apps
                                 </summary>
                                 <div className="mt-4 space-y-3">
@@ -346,7 +348,7 @@ export function ValidatorPage() {
                                         <div className="mt-2 text-green-400"># Response: {`{"vidaScore":85,"status":"ready","errors":[]}`}</div>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-600">
+                                        <span className="text-gray-600 dark:text-gray-400">
                                             Free tier: 10 requests/day • Paid: up to 50,000/month
                                         </span>
                                         <a
@@ -362,10 +364,10 @@ export function ValidatorPage() {
 
                         {/* Main Footer */}
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
                                 ViDA UBL Validator • by BauKlar • vida.bauklar.com
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-gray-500 dark:text-gray-500">
                                 v2026-01-12 • EN 16931 v2 & Peppol BIS 4.0
                             </div>
                         </div>
