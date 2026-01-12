@@ -556,5 +556,9 @@ Engine Version: 1.2.4-stable`;
 
   // --- FINAL RENDER ---
   drawFooter();
-  doc.save(filename);
+
+  // Open in new window for immediate viewing (User Request)
+  const blob = doc.output('blob');
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
 }
