@@ -221,17 +221,25 @@ export function ValidationResults({
 
         <div className="flex flex-wrap gap-3">
           {/* Official PDF Report - €99 for free tier, included for paid */}
-          <button
-            onClick={onDownloadPDF}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${isFreeTier
-              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600'
-              : 'bg-red-600 text-white hover:bg-red-700'
-              }`}
-          >
-            <FileText className="h-4 w-4" />
-            <span>{isFreeTier ? 'Official Report (€99)' : 'PDF Report'}</span>
-            {isFreeTier && <ExternalLink className="h-3 w-3" />}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-end items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+            {userTier === 'free' && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic text-center sm:text-right">
+                Official Independent ViDA / EN 16931 Technical Audit (PDF)<br />
+                <span className="text-xs">Audit-grade compliance document with scope, methodology, and risk assessment.</span>
+              </div>
+            )}
+
+            <button
+              onClick={onDownloadPDF}
+              className={`flex items-center px-6 py-2.5 rounded-lg transition-colors ${userTier === 'free'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-md'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+            >
+              <FileText className="h-5 w-5 mr-2" />
+              {userTier === 'free' ? 'Get Official Audit Report (€99)' : 'Download Audit Report'}
+            </button>
+          </div>
 
           {/* CSV - Upgrade required for free tier */}
           {onDownloadCSV && (
