@@ -1,4 +1,5 @@
 import { Router } from 'itty-router';
+export const router = Router({ base: '/api' });
 import { XMLParser } from 'fast-xml-parser';
 import Decimal from 'decimal.js';
 import { jsPDF } from 'jspdf';
@@ -837,9 +838,6 @@ function getNextResetDate(now: Date): Date {
   return tomorrow;
 }
 
-// Create router with base path
-const router = Router({ base: '/api' });
-
 // Helper functions
 function createResponse<T>(data: T, status = 200, env?: Env, quota?: any): Response {
   const response: ApiResponse<T> = {
@@ -1006,8 +1004,8 @@ router.get('/health', (request: Request, env: Env) => {
   });
 });
 
-// Get quota information (INTERNAL / UI USE ONLY)
-router.get('/api/quota', async (request: Request, env: Env) => {
+// Get quota information
+router.get('/quota', async (request: Request, env: Env) => {
   try {
     const auth = await validateApiKey(request, env, false); // Don't consume quota
 
@@ -1036,8 +1034,8 @@ router.get('/api/quota', async (request: Request, env: Env) => {
   }
 });
 
-// POST /api/validate - FREE or PAID
-router.post('/api/validate', async (request: Request, env: Env) => {
+// POST /validate - FREE or PAID
+router.post('/validate', async (request: Request, env: Env) => {
   try {
     // Validate API key and check quota
     const auth = await validateApiKey(request, env, true);
@@ -1084,8 +1082,8 @@ router.post('/api/validate', async (request: Request, env: Env) => {
   }
 });
 
-// POST /api/flatten - PAID ONLY
-router.post('/api/flatten', async (request: Request, env: Env) => {
+// POST /flatten - PAID ONLY
+router.post('/flatten', async (request: Request, env: Env) => {
   try {
     // Validate API key
     const auth = await validateApiKey(request, env, true);
@@ -1158,8 +1156,8 @@ router.post('/api/flatten', async (request: Request, env: Env) => {
     return createResponse(error instanceof Error ? error.message : 'Flattening failed', 500, env);
   }
 });
-// POST /api/report - Official Compliance Report (€99) - PAID ONLY
-router.post('/api/report', async (request: Request, env: Env) => {
+// POST /report - Official Compliance Report (€99) - PAID ONLY
+router.post('/report', async (request: Request, env: Env) => {
   try {
     // Validate API key
     const auth = await validateApiKey(request, env, true);
