@@ -34,6 +34,7 @@ const COLORS = {
 // Typography V4.0 (Larger)
 const FONTS = {
   main: 'helvetica',
+  code: 'courier',
 };
 
 const FONT_SIZES = {
@@ -186,14 +187,16 @@ export function generateValidationPDF(
 
   y += 50;
 
-  // Status Box
-  const statusX = (PAGE_WIDTH - 240) / 2;
+  // Status Box (Left Aligned - Bank Style)
+  // const statusX = (PAGE_WIDTH - 240) / 2; // Old centered
+  const statusX = MARGIN_SIDE;
   doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
   doc.setLineWidth(1);
   doc.rect(statusX, y, 240, 60);
 
   doc.setFontSize(11);
-  doc.text('COMPLIANCE STATUS:', PAGE_WIDTH / 2, y + 20, { align: 'center' });
+  // doc.text('COMPLIANCE STATUS:', PAGE_WIDTH / 2, y + 20, { align: 'center' });
+  doc.text('COMPLIANCE STATUS:', statusX + 20, y + 20);
 
   const isCompliant = result.valid && result.vida?.aligned !== false;
   const isPartial = result.valid && result.vida?.aligned === false;
@@ -203,7 +206,8 @@ export function generateValidationPDF(
   doc.setFont(FONTS.main, 'bold');
   doc.setFontSize(15);
   doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
-  doc.text(statusText, PAGE_WIDTH / 2, y + 42, { align: 'center' });
+  // doc.text(statusText, PAGE_WIDTH / 2, y + 42, { align: 'center' });
+  doc.text(statusText, statusX + 20, y + 42);
 
   y += 90;
 
@@ -217,13 +221,26 @@ export function generateValidationPDF(
   doc.line(MARGIN_SIDE, y, PAGE_WIDTH - MARGIN_SIDE, y);
   y += 15;
 
-  const drawMetaRow = (label: string, value: string) => {
+  const drawMetaRow = (label: string, value: string, isCode = false) => {
     doc.setFont(FONTS.main, 'bold');
     doc.text(label, MARGIN_SIDE, y);
-    doc.setFont(FONTS.main, 'normal');
+
+    if (isCode) {
+      doc.setFont(FONTS.code, 'normal');
+      // Slight gray background for ID? Optional, let's keep it clean but monospace as requested.
+      // doc.setFillColor(245, 245, 245);
+      // doc.rect(MARGIN_SIDE + 160 - 2, y - 8, 200, 12, 'F');
+      // doc.setTextColor(...);
+    } else {
+      doc.setFont(FONTS.main, 'normal');
+    }
+
     // Align value at fixed offset
     const valX = MARGIN_SIDE + 160;
     doc.text(value, valX, y);
+
+    // Reset font
+    doc.setFont(FONTS.main, 'normal');
 
     // Light Grid line
     doc.setLineWidth(0.5);
@@ -232,11 +249,11 @@ export function generateValidationPDF(
     y += 22; // Increased spacing
   };
 
-  drawMetaRow('Audit Reference ID', auditRefId);
+  drawMetaRow('Audit Reference ID', auditRefId, true); // Monospace
   drawMetaRow('Generated', `${new Date().toUTCString().replace('GMT', 'UTC')}`);
   drawMetaRow('Validation Profile', 'EN 16931 v2 / Peppol BIS 4.0');
   drawMetaRow('Standard Version', 'CEN/TC 434 (2017) + ViDA 2024');
-  drawMetaRow('File Hash', fileHash.length > 25 ? fileHash.substring(0, 25) + '...' : fileHash);
+  drawMetaRow('File Hash', fileHash.length > 25 ? fileHash.substring(0, 25) + '...' : fileHash, true); // Monospace hash too
   drawMetaRow('Validator', 'ViDA UBL Validator v1.2');
   drawMetaRow('Issued by', 'BauKlar Compliance Systems');
 
@@ -365,7 +382,7 @@ The validation process encompasses:
 
 
   // ==========================================
-  // PAGE 4: BREAKDOWN (Expanded V4)
+  // PAGE 4: BREAKDOWN (Expanded V4.2)
   // ==========================================
   addPage();
   y = MARGIN_TOP;
@@ -393,11 +410,16 @@ The validation process encompasses:
 
   y += 25;
 
-  const drawRow = (cat: string, stats: any) => {
+  const drawRow = (cat: string, stats: any, isTotal = false) => {
     doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
+    if (isTotal) doc.setLineWidth(1.5); // Thicker line for total
+    else doc.setLineWidth(0.5);
+
     doc.line(MARGIN_SIDE, y + 25, PAGE_WIDTH - MARGIN_SIDE, y + 25);
 
-    doc.setFont(FONTS.main, 'normal');
+    if (isTotal) doc.setFont(FONTS.main, 'bold');
+    else doc.setFont(FONTS.main, 'normal');
+
     doc.setFontSize(FONT_SIZES.body);
 
     let rX = MARGIN_SIDE + 5;
@@ -423,6 +445,15 @@ The validation process encompasses:
   drawRow('Business Rules', busStats);
   drawRow('ViDA Alignment', vidaStats);
 
+  // Total Row
+  const totalStats = {
+    total: structStats.total + mandStats.total + busStats.total + vidaStats.total,
+    passed: structStats.passed + mandStats.passed + busStats.passed + vidaStats.passed,
+    warns: structStats.warns + mandStats.warns + busStats.warns + vidaStats.warns,
+    fails: structStats.fails + mandStats.fails + busStats.fails + vidaStats.fails
+  };
+  drawRow('TOTAL CHECKS', totalStats, true);
+
   y += 30;
 
   // Validation Metrics Block
@@ -436,7 +467,7 @@ The validation process encompasses:
   const metricsText = `Total Validation Rules Executed: ${totalRules}
 Critical Blocking Errors: ${blockingErrorsCount}
 Compliance Warnings: ${warningsCount}
-Execution Time: < 300ms
+Execution Time: ~250 ms
 Engine Version: 1.2.4-stable`;
 
   y = drawTextBlock(metricsText, y);
