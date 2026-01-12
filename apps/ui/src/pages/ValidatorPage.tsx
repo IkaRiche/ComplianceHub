@@ -14,7 +14,7 @@ const REPORT_PAYMENT_URL = 'https://buy.stripe.com/00w00jefu8Gje7Q0bvfQI00?sourc
 const PRICING_URL = '/pricing';
 
 export function ValidatorPage() {
-    const [userTier, setUserTier] = useState<'free' | 'starter' | 'growth' | 'scale'>('growth');
+    const [userTier, setUserTier] = useState<'free' | 'starter' | 'growth' | 'scale'>('free');
 
     const {
         vidaMode,

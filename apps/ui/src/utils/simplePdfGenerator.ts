@@ -144,14 +144,14 @@ export function generateValidationPDF(
     let fails = 0;
     let warns = 0;
     if (categoryPrefix === 'STRUCTURAL') {
-      fails = violations.filter(e => e.id?.startsWith('XML') || e.id?.startsWith('S-')).length;
-      warns = warnings.filter(w => w.id?.startsWith('XML') || w.id?.startsWith('S-')).length;
+      fails = violations.filter((e: any) => e.id?.startsWith('XML') || e.id?.startsWith('S-')).length;
+      warns = warnings.filter((w: any) => w.id?.startsWith('XML') || w.id?.startsWith('S-')).length;
     } else if (categoryPrefix === 'MANDATORY') {
-      fails = violations.filter(e => (e.id?.startsWith('BR-') && e.message?.includes('missing'))).length;
-      warns = warnings.filter(w => (w.id?.startsWith('BR-') && w.message?.includes('missing'))).length;
+      fails = violations.filter((e: any) => (e.id?.startsWith('BR-') && e.message?.includes('missing'))).length;
+      warns = warnings.filter((w: any) => (w.id?.startsWith('BR-') && w.message?.includes('missing'))).length;
     } else if (categoryPrefix === 'BUSINESS') {
-      fails = violations.filter(e => e.id?.startsWith('BR-') && !e.message?.includes('missing')).length;
-      warns = warnings.filter(w => w.id?.startsWith('BR-') && !w.message?.includes('missing')).length;
+      fails = violations.filter((e: any) => e.id?.startsWith('BR-') && !e.message?.includes('missing')).length;
+      warns = warnings.filter((w: any) => w.id?.startsWith('BR-') && !w.message?.includes('missing')).length;
     } else if (categoryPrefix === 'VIDA') {
       if (result.vida?.aligned === false) fails = 1;
     }
@@ -501,8 +501,8 @@ Engine Version: 1.2.4-stable`;
     };
 
     let c = 1;
-    violations.forEach(v => renderFinding('ERROR', v, c++));
-    warnings.forEach(w => renderFinding('WARNING', w, c++));
+    violations.forEach((v: any) => renderFinding('ERROR', v, c++));
+    warnings.forEach((w: any) => renderFinding('WARNING', w, c++));
   }
 
 
@@ -556,9 +556,5 @@ Engine Version: 1.2.4-stable`;
 
   // --- FINAL RENDER ---
   drawFooter();
-
-  // Open in new window for immediate viewing (User Request)
-  const blob = doc.output('blob');
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
+  doc.save(filename);
 }
