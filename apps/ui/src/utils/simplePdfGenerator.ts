@@ -5,287 +5,384 @@ export interface PDFGenerationOptions {
   filename?: string;
   includeDetailedErrors?: boolean;
   includeWarnings?: boolean;
+  fileHash?: string; // SHA-256 hash of the uploaded file
 }
 
-// Helper to safely render text with UTF-8 characters
+// --- CONSTANTS & CONFIG (Audit V2.0) ---
+
+// Metrics (Points)
+// A4 is 595.28 x 841.89 pt
+const PAGE_WIDTH = 595.28;
+const PAGE_HEIGHT = 841.89;
+const MARGIN_TOP = 71; // ~25mm
+const MARGIN_BOTTOM = 71; // ~25mm
+const MARGIN_LEFT = 62; // ~22mm
+const MARGIN_RIGHT = 62; // ~22mm
+const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
+
+// Colors (Hex -> RGB)
+const COLORS = {
+  text: [26, 26, 26],       // #1A1A1A
+  header: [15, 30, 51],     // #0F1E33
+  line: [218, 221, 226],    // #DADDE2
+  pass: [31, 122, 61],      // #1F7A3D
+  warn: [179, 107, 0],      // #B36B00
+  fail: [138, 31, 31],      // #8A1F1F
+  white: [255, 255, 255],
+};
+
+// Typography
+const FONTS = {
+  main: 'helvetica',
+};
+
+const FONT_SIZES = {
+  coverTitle: 20,
+  sectionTitle: 14,
+  subsection: 11.5,
+  body: 10.5,
+  tableHeader: 10,
+  footer: 8.5,
+};
+
+// Helper: Safe text
 function safeText(text: string): string {
   if (!text) return '';
   return text
-    .replace(/[""]/g, '"')    // Smart quotes to regular quotes
-    .replace(/['']/g, "'")    // Smart apostrophes
-    .replace(/–/g, '-')       // En dash to hyphen
-    .replace(/—/g, '--')      // Em dash to double hyphen
-    .replace(/…/g, '...')     // Ellipsis
-    .replace(/✓/g, '[OK]')    // Check mark to [OK]
-    .replace(/✗/g, '[X]')     // X mark to [X]
-    .replace(/[^\x00-\x7F]/g, '?'); // Non-ASCII to ?
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/–/g, '-')
+    .replace(/—/g, '--')
+    .replace(/…/g, '...')
+    .replace(/[^\x00-\x7F]/g, '?');
 }
 
 export function generateValidationPDF(
   result: ValidationResult,
   options: PDFGenerationOptions = {}
-): void {
+) {
   const {
-    filename = `vida-validation-report-${Date.now()}.pdf`,
+    filename = `compliance-audit-${Date.now()}.pdf`,
     includeDetailedErrors = true,
-    includeWarnings = true,
+    fileHash = 'SHA-256: ------------------------------------------------',
   } = options;
 
-  try {
-    const doc = new jsPDF();
-    
-    // Use Times font for better character support
-    doc.setFont('times', 'normal');
+  const doc = new jsPDF({
+    unit: 'pt',
+    format: 'a4',
+  });
 
-    // Header
-    doc.setFontSize(18);
-    doc.setTextColor(44, 82, 130); // Primary blue
-    doc.text(safeText('ViDA UBL Validation Report'), 20, 25);
-    
-    // Metadata
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Generated: ${new Date().toLocaleString('en-US')}`, 20, 35);
-    doc.text('Profile: EN 16931 v2 & Peppol BIS 4.0', 20, 42);
-    doc.text('ComplianceHub • compliancehub.pages.dev', 20, 49);
-    
-    // Draw header line
-    doc.setDrawColor(200, 200, 200);
-    doc.line(20, 55, 190, 55);
-    
-    // Validation Status
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text('Validation Summary', 20, 70);
-    
-    // Status with color coding
-    doc.setFontSize(12);
-    const statusText = result.valid ? 'PASSED [OK]' : 'FAILED [X]';
-    const statusColor = result.valid ? [34, 197, 94] : [239, 68, 68]; // Green or Red
-    doc.setTextColor(...statusColor);
-    doc.text(safeText(`Status: ${statusText}`), 20, 85);
-    
-    // Statistics
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
-    const errorCount = result.errors?.length || 0;
-    const warningCount = result.warnings?.length || 0;
-    const infoCount = result.infos?.length || 0;
-    
-    doc.text(`Errors: ${errorCount}`, 20, 100);
-    doc.text(`Warnings: ${warningCount}`, 70, 100);
-    doc.text(`Infos: ${infoCount}`, 120, 100);
-    
-    let currentY = 115;
-    
-    // ViDA Compliance Section
-    if (result.vida) {
-      doc.setFontSize(14);
-      doc.text('ViDA Compliance Score', 20, currentY);
-      currentY += 10;
-      
-      // Score with color coding
-      doc.setFontSize(16);
-      const score = result.vida.score || 0;
-      const scoreColor = score >= 80 ? [34, 197, 94] : score >= 60 ? [251, 146, 60] : [239, 68, 68];
-      doc.setTextColor(...scoreColor);
-      doc.text(`${score}/100`, 20, currentY + 5);
-      
-      // Alignment status
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      const alignmentText = result.vida.aligned ? '(ViDA Aligned [OK])' : '(Needs Improvement)';
-      doc.text(safeText(alignmentText), 60, currentY + 5);
-      
-      currentY += 20;
-      
-      // ViDA Checklist - Simple text format
-      if (result.vida.checklist && result.vida.checklist.length > 0) {
-        doc.setFontSize(12);
-        doc.text('ViDA Checklist', 20, currentY);
-        currentY += 10;
-        
-        result.vida.checklist.forEach((item: any) => {
-          const status = item.passed ? '[OK]' : '[X]';
-          const color = item.passed ? [34, 197, 94] : [239, 68, 68];
-          
-          doc.setTextColor(...color);
-          doc.setFontSize(10);
-          doc.text(status, 20, currentY);
-          
-          doc.setTextColor(0, 0, 0);
-          const title = safeText(item.title || 'Check');
-          doc.text(title, 35, currentY);
-          
-          currentY += 8;
-        });
-        
-        currentY += 10;
-      }
-    }
-    
-    // Detailed Issues Section
-    if ((errorCount > 0 && includeDetailedErrors) || (warningCount > 0 && includeWarnings)) {
-      // Check if we need a new page
-      if (currentY > 240) {
-        doc.addPage();
-        currentY = 25;
-      }
-      
-      doc.setFontSize(14);
-      doc.text('Detailed Issues', 20, currentY);
-      currentY += 15;
-      
-      // Errors
-      if (errorCount > 0 && includeDetailedErrors) {
-        doc.setFontSize(12);
-        doc.setTextColor(239, 68, 68);
-        doc.text(`Errors (${errorCount})`, 20, currentY);
-        doc.setTextColor(0, 0, 0);
-        currentY += 10;
-        
-        (result.errors || []).forEach((error: any, index: number) => {
-          if (currentY > 270) {
-            doc.addPage();
-            currentY = 25;
-          }
-          
-          doc.setFontSize(9);
-          doc.setTextColor(200, 0, 0);
-          doc.text(`${index + 1}.`, 20, currentY);
-          
-          doc.setTextColor(0, 0, 0);
-          const ruleId = safeText(error.id || error.ruleId || 'N/A');
-          const rulePath = safeText(error.path || 'N/A');
-          doc.text(`Rule: ${ruleId} • Path: ${rulePath}`, 30, currentY);
-          
-          currentY += 6;
-          
-          const message = safeText(error.message || error.description || 'No description');
-          const lines = doc.splitTextToSize(message, 160);
-          doc.text(lines, 30, currentY);
-          currentY += lines.length * 4 + 2;
-          
-          // Add hint if available
-          if (error.hint) {
-            doc.setFontSize(8);
-            doc.setTextColor(0, 100, 0);
-            const hint = safeText(`Fix: ${error.hint}`);
-            const hintLines = doc.splitTextToSize(hint, 160);
-            doc.text(hintLines, 30, currentY);
-            currentY += hintLines.length * 3 + 2;
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-          }
-        });
-        
-        currentY += 10;
-      }
-      
-      // Warnings
-      if (warningCount > 0 && includeWarnings) {
-        if (currentY > 240) {
-          doc.addPage();
-          currentY = 25;
-        }
-        
-        doc.setFontSize(12);
-        doc.setTextColor(251, 146, 60);
-        doc.text(`Warnings (${warningCount})`, 20, currentY);
-        doc.setTextColor(0, 0, 0);
-        currentY += 10;
-        
-        (result.warnings || []).forEach((warning: any, index: number) => {
-          if (currentY > 270) {
-            doc.addPage();
-            currentY = 25;
-          }
-          
-          doc.setFontSize(9);
-          doc.setTextColor(200, 100, 0);
-          doc.text(`${index + 1}.`, 20, currentY);
-          
-          doc.setTextColor(0, 0, 0);
-          const ruleId = safeText(warning.id || warning.ruleId || 'N/A');
-          const rulePath = safeText(warning.path || 'N/A');
-          doc.text(`Rule: ${ruleId} • Path: ${rulePath}`, 30, currentY);
-          
-          currentY += 6;
-          
-          const message = safeText(warning.message || warning.description || 'No description');
-          const lines = doc.splitTextToSize(message, 160);
-          doc.text(lines, 30, currentY);
-          currentY += lines.length * 4 + 2;
-          
-          // Add hint if available
-          if (warning.hint) {
-            doc.setFontSize(8);
-            doc.setTextColor(0, 100, 0);
-            const hint = safeText(`Fix: ${warning.hint}`);
-            const hintLines = doc.splitTextToSize(hint, 160);
-            doc.text(hintLines, 30, currentY);
-            currentY += hintLines.length * 3 + 2;
-            doc.setFontSize(9);
-            doc.setTextColor(0, 0, 0);
-          }
-        });
-      }
-    }
-    
-    // Footer on all pages
-    const pageCount = doc.internal.pages.length - 1;
-    for (let i = 1; i <= pageCount; i++) {
+  // State for page numbering
+  let pageCount = 0;
+
+  // --- Helpers ---
+
+  const addPage = () => {
+    if (pageCount > 0) doc.addPage();
+    pageCount++;
+  };
+
+  const drawFooter = () => {
+    const totalPages = doc.internal.pages.length - 1;
+    for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(
-        'ComplianceHub • ViDA UBL Validator • Generated by compliancehub.pages.dev',
-        20,
-        285
-      );
-      doc.text(`Page ${i} of ${pageCount}`, 170, 285);
+      doc.setFont(FONTS.main, 'normal');
+      doc.setFontSize(FONT_SIZES.footer);
+      doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+
+      // Left: Brand
+      doc.text('ViDA UBL Validator · BauKlar', MARGIN_LEFT, PAGE_HEIGHT - 25);
+
+      // Right: Pagination
+      doc.text(`Page ${i} of ${totalPages}`, PAGE_WIDTH - MARGIN_RIGHT, PAGE_HEIGHT - 25, { align: 'right' });
     }
-    
-    // Save the PDF
-    doc.save(filename);
-    
-  } catch (error) {
-    console.error('PDF generation failed:', error);
-    
-    // Fallback: very simple PDF
-    try {
-      const doc = new jsPDF();
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(16);
-      doc.text('ViDA UBL Validation Report', 20, 30);
-      
-      doc.setFontSize(12);
-      doc.text(`Status: ${result.valid ? 'PASSED' : 'FAILED'}`, 20, 50);
-      doc.text(`Errors: ${result.errors?.length || 0}`, 20, 65);
-      doc.text(`Warnings: ${result.warnings?.length || 0}`, 20, 80);
-      
-      if (result.vida) {
-        doc.text(`ViDA Score: ${result.vida.score || 0}/100`, 20, 100);
-        doc.text(`ViDA Aligned: ${result.vida.aligned ? 'YES' : 'NO'}`, 20, 115);
+  };
+
+  const drawSectionTitle = (title: string, y: number) => {
+    doc.setFont(FONTS.main, 'bold');
+    doc.setFontSize(FONT_SIZES.sectionTitle);
+    doc.setTextColor(COLORS.header[0], COLORS.header[1], COLORS.header[2]);
+    doc.text(title.toUpperCase(), MARGIN_LEFT, y);
+    return y + 25; // Spacing after title
+  };
+
+  // --- Logic ---
+
+  // Determine Status
+  const isCompliant = result.valid && result.vida?.aligned !== false;
+  const isPartial = result.valid && result.vida?.aligned === false;
+
+  const statusText = isCompliant ? 'COMPLIANT' : (isPartial ? 'PARTIALLY COMPLIANT' : 'NOT COMPLIANT');
+  const statusColor = isCompliant ? COLORS.pass : (isPartial ? COLORS.warn : COLORS.fail);
+
+  // ==========================================
+  // PAGE 1: COVER
+  // ==========================================
+  addPage();
+
+  let y = MARGIN_TOP + 40;
+
+  // Title
+  doc.setFont(FONTS.main, 'bold');
+  doc.setFontSize(FONT_SIZES.coverTitle);
+  doc.setTextColor(COLORS.header[0], COLORS.header[1], COLORS.header[2]);
+  doc.text('OFFICIAL ViDA / EN 16931', PAGE_WIDTH / 2, y, { align: 'center' });
+  doc.text('COMPLIANCE AUDIT', PAGE_WIDTH / 2, y + 25, { align: 'center' });
+
+  y += 50;
+
+  // Subtitle
+  doc.setFont(FONTS.main, 'normal');
+  doc.setFontSize(14); // Slightly larger than body
+  doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+  doc.text('Electronic Invoice Validation Report', PAGE_WIDTH / 2, y, { align: 'center' });
+
+  y += 80;
+
+  // Compliance Verdict (Framed Box)
+  const boxWidth = 200;
+  const boxHeight = 60;
+  const boxX = (PAGE_WIDTH - boxWidth) / 2;
+
+  doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
+  doc.setLineWidth(1); // Standard line
+  doc.rect(boxX, y, boxWidth, boxHeight);
+
+  // Verdict content
+  doc.setFontSize(10);
+  doc.text('COMPLIANCE STATUS:', PAGE_WIDTH / 2, y + 20, { align: 'center' });
+
+  doc.setFont(FONTS.main, 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]); // Status color
+  doc.text(statusText, PAGE_WIDTH / 2, y + 42, { align: 'center' });
+
+  y += 120;
+
+  // Metadata Table
+  doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]); // Reset text color
+  doc.setFontSize(FONT_SIZES.body);
+
+  const drawMetaRow = (label: string, value: string, currentY: number) => {
+    doc.setFont(FONTS.main, 'bold');
+    doc.text(label, MARGIN_LEFT + 20, currentY);
+    doc.setFont(FONTS.main, 'normal');
+    doc.text(value, MARGIN_LEFT + 150, currentY);
+    // Line below
+    doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
+    doc.line(MARGIN_LEFT + 20, currentY + 10, PAGE_WIDTH - MARGIN_RIGHT - 20, currentY + 10);
+    return currentY + 25;
+  };
+
+  y = drawMetaRow('Generated', `${new Date().toUTCString().split(' ').slice(0, 5).join(' ')} UTC`, y);
+  y = drawMetaRow('Validation Profile', 'EN 16931 v2 / Peppol BIS 4.0', y);
+  y = drawMetaRow('ViDA Status', result.vida?.aligned ? 'Aligned (EU 2030)' : 'Not Aligned', y);
+  y = drawMetaRow('File Hash', fileHash.length > 30 ? fileHash.substring(0, 30) + '...' : fileHash, y);
+  y = drawMetaRow('Validator', 'ViDA UBL Validator', y);
+  y = drawMetaRow('Issued by', 'BauKlar', y);
+
+  // Cover Footer Disclaimer
+  doc.setFont(FONTS.main, 'normal');
+  doc.setFontSize(FONT_SIZES.footer);
+  doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+  doc.text('This document represents an independent technical compliance assessment.', PAGE_WIDTH / 2, PAGE_HEIGHT - 60, { align: 'center' });
+
+
+  // ==========================================
+  // PAGE 2: EXECUTIVE SUMMARY
+  // ==========================================
+  addPage();
+  y = MARGIN_TOP;
+  y = drawSectionTitle('EXECUTIVE COMPLIANCE SUMMARY', y);
+
+  // Verdict Block (Framed box spanning width)
+  const verdictHeight = 90;
+  doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
+  doc.rect(MARGIN_LEFT, y, CONTENT_WIDTH, verdictHeight);
+
+  doc.setFont(FONTS.main, 'bold');
+  doc.setFontSize(FONT_SIZES.subsection);
+  doc.text('Compliance Conclusion:', MARGIN_LEFT + 15, y + 25);
+
+  doc.setFont(FONTS.main, 'normal');
+  doc.setFontSize(FONT_SIZES.body);
+  const conclusionText = isCompliant
+    ? 'The validated electronic invoice complies with ViDA and EN 16931 requirements. No blocking issues were identified. The invoice is suitable for submission and processing.'
+    : (isPartial
+      ? 'The invoice complies with core EN 16931 rules but has warnings regarding future ViDA alignment. It is valid for current submission but requires updates for 2030 compliance.'
+      : 'The invoice contains critical errors violating EN 16931 standards. It is NOT valid for submission and must be corrected.'
+    );
+
+  const conclusionLines = doc.splitTextToSize(conclusionText, CONTENT_WIDTH - 30);
+  doc.text(conclusionLines, MARGIN_LEFT + 15, y + 45);
+
+  y += verdictHeight + 40;
+
+  // Score Block
+  doc.setFont(FONTS.main, 'bold');
+  doc.setFontSize(FONT_SIZES.subsection);
+  doc.text('ViDA Compliance Score:', MARGIN_LEFT, y);
+
+  doc.setFontSize(24);
+  doc.text(`${result.vida?.score || 0} / 100`, MARGIN_LEFT, y + 35);
+
+  doc.setFontSize(FONT_SIZES.subsection);
+  doc.text('Interpretation:', MARGIN_LEFT, y + 65);
+
+  doc.setFont(FONTS.main, 'normal');
+  doc.setFontSize(FONT_SIZES.body);
+  const interpretation = (result.vida?.score || 0) === 100
+    ? 'Fully aligned with ViDA requirements'
+    : ((result.vida?.score || 0) > 80 ? 'High alignment, minor adjustments recommended' : 'Requires significant changes for ViDA compliance');
+  doc.text(interpretation, MARGIN_LEFT, y + 85);
+
+
+  // ==========================================
+  // PAGE 3: COMPLIANCE BREAKDOWN
+  // ==========================================
+  addPage();
+  y = MARGIN_TOP;
+  y = drawSectionTitle('COMPLIANCE BREAKDOWN', y);
+
+  // Table Logic
+  doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
+
+  // Header
+  doc.setFont(FONTS.main, 'bold');
+  doc.setFontSize(FONT_SIZES.tableHeader);
+  doc.setFillColor(245, 245, 245); // Very light gray header
+  doc.rect(MARGIN_LEFT, y, CONTENT_WIDTH, 20, 'F');
+  doc.text('Category', MARGIN_LEFT + 10, y + 14);
+  doc.text('Result', MARGIN_LEFT + 300, y + 14);
+
+  y += 20;
+
+  const violations = result.errors || [];
+  const structuralPass = !violations.some(e => (e.id && (e.id.startsWith('XML') || e.id.startsWith('S-'))));
+  const mandatoryPass = !violations.some(e => (e.id && e.id.startsWith('BR-')) || (e.message && e.message.toLowerCase().includes('missing')));
+  const businessRulesPass = !violations.some(e => e.id && e.id.startsWith('BR-'));
+  const vidaPass = result.vida?.aligned ?? false;
+
+  const drawTableRow = (category: string, passed: boolean) => {
+    // Bottom line
+    doc.line(MARGIN_LEFT, y + 25, MARGIN_LEFT + CONTENT_WIDTH, y + 25);
+
+    doc.setFont(FONTS.main, 'normal');
+    doc.setFontSize(FONT_SIZES.body);
+    doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+    doc.text(category, MARGIN_LEFT + 10, y + 17);
+
+    // Result Text
+    const resText = passed ? 'Passed' : 'Failed';
+    const resColor = passed ? COLORS.pass : COLORS.fail;
+
+    doc.setFont(FONTS.main, 'bold');
+    doc.setTextColor(resColor[0], resColor[1], resColor[2]);
+    doc.text(resText, MARGIN_LEFT + 300, y + 17);
+
+    y += 25;
+  };
+
+  drawTableRow('Structural Validation', structuralPass);
+  drawTableRow('Mandatory Fields', mandatoryPass);
+  drawTableRow('Business Rules', businessRulesPass);
+  drawTableRow('ViDA Alignment', vidaPass);
+
+
+  // ==========================================
+  // PAGE 4: DETAILED FINDINGS (Conditional)
+  // ==========================================
+
+  const warnings = result.warnings || [];
+  if (includeDetailedErrors && (violations.length > 0 || warnings.length > 0)) {
+    addPage();
+    y = MARGIN_TOP;
+    y = drawSectionTitle('DETAILED FINDINGS', y);
+
+    const renderFinding = (type: 'ERROR' | 'WARNING', item: any) => {
+      const severity = type === 'ERROR' ? 'Critical' : 'Informational';
+      const id = safeText(item.id || item.ruleId || 'N/A');
+      const color = type === 'ERROR' ? COLORS.fail : COLORS.warn;
+
+      // Heading
+      doc.setFont(FONTS.main, 'bold');
+      doc.setFontSize(FONT_SIZES.subsection);
+      doc.setTextColor(color[0], color[1], color[2]);
+      doc.text(`${type === 'ERROR' ? 'Error' : 'Warning'} ${id}`, MARGIN_LEFT, y);
+      y += 15;
+
+      // Table-like structure for finding
+      const drawField = (label: string, val: string) => {
+        doc.setFont(FONTS.main, 'bold');
+        doc.setFontSize(FONT_SIZES.body);
+        doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+        doc.text(label, MARGIN_LEFT, y);
+
+        const valLines = doc.splitTextToSize(val, CONTENT_WIDTH - 100);
+        doc.setFont(FONTS.main, 'normal');
+        doc.text(valLines, MARGIN_LEFT + 100, y);
+
+        y += (valLines.length * 12) + 6;
+      };
+
+      drawField('Path', safeText(item.path || 'N/A'));
+      drawField('Description', safeText(item.message || item.description || 'No description'));
+      drawField('Impact', type === 'ERROR' ? 'Blocks compliance' : 'Does not affect compliance');
+      drawField('Severity', severity);
+
+      y += 15; // Spacer between items
+
+      // Page break check
+      if (y > PAGE_HEIGHT - MARGIN_BOTTOM - 50) {
+        addPage();
+        y = MARGIN_TOP;
       }
-      
-      if (result.errors?.length) {
-        doc.text('Errors:', 20, 140);
-        let y = 155;
-        result.errors.slice(0, 5).forEach((error: any, i: number) => {
-          const text = `${i + 1}. ${error.ruleId || 'N/A'}: ${error.message || 'No description'}`;
-          const lines = doc.splitTextToSize(text, 170);
-          doc.text(lines, 20, y);
-          y += lines.length * 5 + 3;
-        });
-      }
-      
-      doc.text('Generated by ComplianceHub', 20, 270);
-      doc.save(filename);
-      
-    } catch (fallbackError) {
-      console.error('Even fallback PDF failed:', fallbackError);
-      alert('PDF generation failed completely. Please download JSON instead.');
-    }
+    };
+
+    violations.forEach(v => renderFinding('ERROR', v));
+    warnings.forEach(w => renderFinding('WARNING', w));
   }
+
+
+  // ==========================================
+  // LAST PAGE: LEGAL & METHODOLOGY
+  // ==========================================
+  // If plenty of space left on previous page, use it? Spec says "Last Page" but also "Separate section".
+  // Let's force a new page if space is tight (< 200pt), otherwise use current.
+  // Actually spec header says "LAST PAGE", implying a separate page usually. 
+  // But strict interpretation: "LAST PAGE — LEGAL & METHODOLOGY".
+
+  if (y > PAGE_HEIGHT / 2) {
+    addPage();
+    y = MARGIN_TOP;
+  } else {
+    y += 40;
+  }
+
+  // Divider
+  doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
+  doc.line(MARGIN_LEFT, y, PAGE_WIDTH - MARGIN_RIGHT, y);
+  y += 30;
+
+  doc.setFont(FONTS.main, 'bold');
+  doc.setFontSize(FONT_SIZES.subsection); // Slightly smaller section title
+  doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+  doc.text('METHODOLOGY & DISCLAIMER', MARGIN_LEFT, y);
+  y += 20;
+
+  doc.setFont(FONTS.main, 'normal');
+  doc.setFontSize(FONT_SIZES.footer); // Small text for legal
+  doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
+
+  const legalText = `This report represents a technical compliance assessment based on ViDA and EN 16931 rules.
+It does not constitute legal, tax, or accounting advice.
+
+The assessment is performed using deterministic validation rules.
+No invoice data is stored or retained as part of this process.`;
+
+  doc.text(legalText, MARGIN_LEFT, y);
+
+  // --- FINAL RENDER ---
+  drawFooter();
+  doc.save(filename);
 }
