@@ -1,13 +1,23 @@
 import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { FileText, Shield, Zap, Check, ExternalLink, Code, Building, CreditCard, Lock } from 'lucide-react';
+import { SEOHead } from '../components/SEOHead.js';
 
-interface LandingPageProps {
-    onTryFree: () => void;
-}
+export function LandingPage() {
+    const navigate = useNavigate();
 
-export function LandingPage({ onTryFree }: LandingPageProps) {
+    const handleTryFree = () => {
+        navigate('/validator');
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+            <SEOHead
+                title="ViDA UBL Validator - Official EU Compliance Tool"
+                description="Validate UBL invoices against EN 16931 and ViDA standards. Official compliance reports, API access, and GDPR-safe processing."
+                canonical="/"
+            />
+
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,12 +32,12 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
                             </div>
                         </div>
                         <nav className="flex items-center space-x-6">
-                            <a href="#pricing" className="text-gray-600 hover:text-gray-900 font-medium">Pricing</a>
-                            <a href="https://vida.bauklar.com/docs" className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1">
+                            <Link to="/pricing" className="text-gray-600 hover:text-gray-900 font-medium">Pricing</Link>
+                            <Link to="/api-docs" className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1">
                                 API Docs <ExternalLink className="h-3 w-3" />
-                            </a>
+                            </Link>
                             <button
-                                onClick={onTryFree}
+                                onClick={handleTryFree}
                                 className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
                             >
                                 Try Free
@@ -57,19 +67,19 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
 
                     <div className="flex items-center justify-center gap-4 mb-12">
                         <button
-                            onClick={onTryFree}
+                            onClick={handleTryFree}
                             className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2"
                         >
                             <Zap className="h-5 w-5" />
                             Try Free — 10 validations/day
                         </button>
-                        <a
-                            href="https://vida.bauklar.com/docs"
+                        <Link
+                            to="/api-docs"
                             className="bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-200 transition-all flex items-center gap-2"
                         >
                             <Code className="h-5 w-5" />
                             API Documentation
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Quick features */}
@@ -149,7 +159,7 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
                                 </li>
                             </ul>
                             <button
-                                onClick={onTryFree}
+                                onClick={handleTryFree}
                                 className="w-full py-3 rounded-lg border-2 border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                             >
                                 Start Free
@@ -259,12 +269,12 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
                             </div>
                             <div className="text-center md:text-right">
                                 <p className="text-4xl font-bold text-gray-900 mb-2">€99<span className="text-lg font-normal text-gray-500">/file</span></p>
-                                <a
-                                    href="https://buy.stripe.com/PLACEHOLDER_STRIPE_LINK?source=validator_ui"
+                                <Link
+                                    to="/official-compliance-report"
                                     className="inline-block px-6 py-3 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors"
                                 >
-                                    Purchase Report
-                                </a>
+                                    More Info
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -308,10 +318,10 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
                         </div>
                     </div>
                     <div className="flex items-center gap-6 text-sm text-gray-600">
-                        <a href="https://vida.bauklar.com/docs" className="hover:text-gray-900">API Docs</a>
+                        <Link to="/api-docs" className="hover:text-gray-900">API Docs</Link>
                         <a href="mailto:api@bauklar.com" className="hover:text-gray-900">Contact</a>
-                        <a href="https://bauklar.com/privacy" className="hover:text-gray-900">Privacy</a>
-                        <a href="https://bauklar.com/terms" className="hover:text-gray-900">Terms</a>
+                        <Link to="/privacy" className="hover:text-gray-900">Privacy</Link>
+                        <Link to="/terms" className="hover:text-gray-900">Terms</Link>
                     </div>
                 </div>
             </footer>
