@@ -46,9 +46,8 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
                     </div>
 
                     <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                        Validate UBL invoices for
-                        <span className="text-blue-600"> ViDA compliance</span>
-                        <br />in seconds
+                        Official ViDA / EN 16931 Validation for
+                        <span className="text-blue-600"> UBL Invoices</span>
                     </h1>
 
                     <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
@@ -261,7 +260,7 @@ export function LandingPage({ onTryFree }: LandingPageProps) {
                             <div className="text-center md:text-right">
                                 <p className="text-4xl font-bold text-gray-900 mb-2">€99<span className="text-lg font-normal text-gray-500">/file</span></p>
                                 <a
-                                    href="https://buy.stripe.com/PLACEHOLDER_STRIPE_LINK"
+                                    href="https://buy.stripe.com/PLACEHOLDER_STRIPE_LINK?source=validator_ui"
                                     className="inline-block px-6 py-3 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors"
                                 >
                                     Purchase Report

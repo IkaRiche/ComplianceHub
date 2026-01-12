@@ -123,11 +123,7 @@ curl -X POST https://compliancehub-api.heizungsrechner.workers.dev/api/flatten \
   -F "denormalized=true"
 ```
 
-### **GET /api/quota**
-Check your daily quota
-```bash
-curl https://compliancehub-api.heizungsrechner.workers.dev/api/quota
-```
+
 
 ### **POST /api/process**
 Combined validation + flattening (recommended)
