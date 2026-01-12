@@ -1,0 +1,24 @@
+{
+  "name": "@compliance-hub/api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@compliance-hub/shared": "*",
+    "@compliance-hub/core-ubl": "*",
+    "itty-router": "^4.0.25",
+    "jspdf": "^2.5.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231025.0",
+    "typescript": "^5.2.2",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.19.0"
+  }
+}

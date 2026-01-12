@@ -1,0 +1,28 @@
+name = "compliancehub-api"
+main = "src/standalone.ts"
+compatibility_date = "2026-01-12"
+# Используем новый nodejs_compat вместо node_compat
+compatibility_flags = ["nodejs_compat"]
+
+# KV namespaces
+kv_namespaces = [
+  { binding = "KV_QUOTA", id = "bafd71d0b19a468ca2fb2f17f9f99f05", preview_id = "308a39a9e4b948718015821053789b8d" },
+  { binding = "KV_API_KEYS", id = "96c57a459998468e937949e5ff205083", preview_id = "28c9f91a1f1c4980bb464dfd6914a438" }
+]
+
+# Environment variables
+[vars]
+API_VERSION = "2026-01-12"
+MAX_FILE_SIZE = "5242880"  # 5MB
+FREE_QUOTA_DAILY = "10"   # Free tier: 10 validations per day
+
+# Production environment
+[env.production]
+name = "compliancehub-api"
+routes = [
+  { pattern = "vida.bauklar.com/api/*", zone_name = "bauklar.com" }
+]
+
+# Staging environment  
+[env.staging]
+name = "compliancehub-api-staging"

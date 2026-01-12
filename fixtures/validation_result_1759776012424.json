@@ -1,0 +1,46 @@
+{
+  "valid": false,
+  "errors": [
+    {
+      "id": "BR-11",
+      "severity": "ERROR",
+      "path": "/Invoice/cac:LegalMonetaryTotal",
+      "message": "Sum of line net amounts does not equal tax exclusive amount",
+      "hint": "Recalculate sum(lineExtensionAmount) = taxExclusiveAmount"
+    },
+    {
+      "id": "BR-13",
+      "severity": "ERROR",
+      "path": "/Invoice/cac:TaxTotal/cac:TaxSubtotal",
+      "message": "Rule execution failed: 0% VAT rate missing exemption reason",
+      "hint": "BT-121 Tax exemption reason is required for 0% VAT"
+    }
+  ],
+  "warnings": [],
+  "infos": [],
+  "meta": {
+    "profile": "XRECHNUNG",
+    "score": 80,
+    "checklist": [
+      {
+        "id": "DRR-01",
+        "status": "✓ OK",
+        "hint": "Digital Reporting Reference for ViDA compliance",
+        "severity": "WARN"
+      },
+      {
+        "id": "VAT-EXEMPTION",
+        "status": "✗ Fail",
+        "hint": "0% VAT rates have proper exemption reasons",
+        "severity": "ERROR"
+      },
+      {
+        "id": "ARITHMETIC",
+        "status": "✗ Fail",
+        "hint": "All monetary calculations are correct",
+        "severity": "ERROR"
+      }
+    ],
+    "vidaCompliant": true
+  }
+}

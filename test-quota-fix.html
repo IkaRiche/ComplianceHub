@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quota Fix Test</title>
+</head>
+<body>
+    <h1>Testing Quota Fix</h1>
+    <p>This page will monitor network requests to verify the infinite quota API calls have been fixed.</p>
+    
+    <div id="status"></div>
+    <div id="requests"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const requestsDiv = document.getElementById('requests');
+        
+        // Monitor fetch requests
+        const originalFetch = window.fetch;
+        let requestCount = 0;
+        const quotaRequests = [];
+        
+        window.fetch = function(url, options) {
+            requestCount++;
+            if (url && url.includes('/api/quota')) {
+                quotaRequests.push({
+                    count: quotaRequests.length + 1,
+                    time: new Date().toLocaleTimeString()
+                });
+                updateDisplay();
+            }
+            return originalFetch.apply(this, arguments);
+        };
+        
+        function updateDisplay() {
+            statusDiv.innerHTML = `<h3>Quota Requests: ${quotaRequests.length}</h3>`;
+            requestsDiv.innerHTML = quotaRequests.map(req => 
+                `<p>Request ${req.count} at ${req.time}</p>`
+            ).join('');
+        }
+        
+        // Load the app in an iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://8080-ivhzuspuojb03klwofkti-6532622b.e2b.dev';
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        document.body.appendChild(iframe);
+        
+        updateDisplay();
+    </script>
+</body>
+</html>
