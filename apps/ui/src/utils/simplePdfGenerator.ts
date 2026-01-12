@@ -86,24 +86,27 @@ export function generateValidationPDF(
     pageCount++;
   };
 
+  // Footer on ALL pages
   const drawFooter = () => {
-    const totalPages = doc.internal.pages.length - 1;
+    const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       doc.setFont(FONTS.main, 'normal');
       doc.setFontSize(FONT_SIZES.footer);
       doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2]);
 
-      // Line
+      // Line above footer
       doc.setLineWidth(0.5);
       doc.setDrawColor(COLORS.line[0], COLORS.line[1], COLORS.line[2]);
-      doc.line(MARGIN_SIDE, PAGE_HEIGHT - 35, PAGE_WIDTH - MARGIN_SIDE, PAGE_HEIGHT - 35);
+      const footerLineY = PAGE_HEIGHT - 45; // Raised from 35
+      doc.line(MARGIN_SIDE, footerLineY, PAGE_WIDTH - MARGIN_SIDE, footerLineY);
 
-      // Left
-      doc.text('ViDA UBL Validator · BauKlar', MARGIN_SIDE, PAGE_HEIGHT - 20);
+      // Left: Brand
+      const footerTextY = PAGE_HEIGHT - 30; // Raised from 20
+      doc.text('ViDA UBL Validator · BauKlar', MARGIN_SIDE, footerTextY);
 
-      // Right
-      doc.text(`Page ${i} of ${totalPages}`, PAGE_WIDTH - MARGIN_SIDE, PAGE_HEIGHT - 20, { align: 'right' });
+      // Right: Pagination
+      doc.text(`Page ${i} of ${totalPages}`, PAGE_WIDTH - MARGIN_SIDE, footerTextY, { align: 'right' });
     }
   };
 
