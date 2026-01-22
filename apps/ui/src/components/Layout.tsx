@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, ExternalLink } from 'lucide-react';
+import { FileText, ExternalLink, ArrowLeft } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle.js';
 
 interface LayoutProps {
@@ -21,6 +21,9 @@ export function Layout({ children }: LayoutProps) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         <div className="flex items-center space-x-3">
+                            <a href="https://app.bauklar.com/launchpad" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Back to Launchpad">
+                                <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                            </a>
                             <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
                                 <div className="p-2 bg-blue-600 rounded-lg">
                                     <FileText className="h-6 w-6 text-white" />
