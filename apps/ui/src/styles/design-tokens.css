@@ -1,0 +1,44 @@
+/* BauKlar Ecosystem Design Tokens */
+:root {
+    /* Colors */
+    --bk-bg-dark: #0a0a0c;
+    --bk-bg-card: #16161a;
+    --bk-text-primary: #ffffff;
+    --bk-text-muted: #94a3b8;
+    --bk-border: #2a2a30;
+    --bk-focus: #3b82f6;
+
+    /* Accents */
+    --bk-accent-blue: #3b82f6;
+    --bk-accent-emerald: #10b981;
+
+    /* Typography */
+    --bk-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Spacing */
+    --bk-space-xs: 0.25rem;
+    --bk-space-sm: 0.5rem;
+    --bk-space-md: 1rem;
+    --bk-space-lg: 2rem;
+    --bk-space-xl: 4rem;
+
+    /* Radii */
+    --bk-radius-sm: 0.5rem;
+    --bk-radius-md: 1rem;
+    --bk-radius-lg: 2.5rem;
+    --bk-radius-full: 9999px;
+
+    /* Shadows */
+    --bk-shadow-card: 0 10px 40px rgba(0, 0, 0, 0.3);
+    --bk-shadow-popup: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Light Mode Overrides (if needed for specific tools) */
+.bk-theme-light {
+    --bk-bg-dark: #f8fafc;
+    --bk-bg-card: #ffffff;
+    --bk-text-primary: #0f172a;
+    --bk-text-muted: #64748b;
+    --bk-border: #e2e8f0;
+    --bk-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}

@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { LandingPage } from './pages/LandingPage.js';
 import { ValidatorPage } from './pages/ValidatorPage.js';
 import { ApiDocs } from './pages/ApiDocs.js';
 import { Privacy } from './pages/Privacy.js';
@@ -13,7 +12,7 @@ import { En16931Validation } from './pages/En16931Validation.js';
 import { OfficialReport } from './pages/OfficialReport.js';
 import { Faq } from './pages/Faq.js';
 import { ThemeProvider } from './context/ThemeContext.js';
-import { Layout } from './components/Layout.js';
+import { EcosystemShell } from './components/EcosystemShell.js';
 
 export default function App() {
   return (
@@ -21,22 +20,30 @@ export default function App() {
       <ThemeProvider>
         <BrowserRouter>
           <Routes>
-            {/* Core App */}
-            <Route path="/" element={<Layout><LandingPage /></Layout>} />
-            <Route path="/validator" element={<ValidatorPage />} />
+            {/* Core Tool - Root is now the Validator */}
+            <Route path="/" element={
+              <EcosystemShell productName="ViDA UBL Validator">
+                <ValidatorPage />
+              </EcosystemShell>
+            } />
 
-            {/* Trust Pages */}
-            <Route path="/api-docs" element={<Layout><ApiDocs /></Layout>} />
-            <Route path="/privacy" element={<Layout><Privacy /></Layout>} />
-            <Route path="/terms" element={<Layout><Terms /></Layout>} />
-            <Route path="/security" element={<Layout><Security /></Layout>} />
-            <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+            {/* Legacy/Direct Route */}
+            <Route path="/validator" element={<Navigate to="/" replace />} />
 
-            {/* SEO Pages */}
-            <Route path="/vida-validator" element={<Layout><VidaValidator /></Layout>} />
-            <Route path="/en-16931-validation" element={<Layout><En16931Validation /></Layout>} />
-            <Route path="/official-compliance-report" element={<Layout><OfficialReport /></Layout>} />
-            <Route path="/faq" element={<Layout><Faq /></Layout>} />
+            {/* Info Pages - Wrapped in Shell */}
+            <Route path="/api-docs" element={<EcosystemShell productName="ViDA UBL Validator"><ApiDocs /></EcosystemShell>} />
+            <Route path="/pricing" element={<EcosystemShell productName="ViDA UBL Validator"><Pricing /></EcosystemShell>} />
+
+            {/* Legal - Wrapped in Shell */}
+            <Route path="/privacy" element={<EcosystemShell productName="ViDA UBL Validator"><Privacy /></EcosystemShell>} />
+            <Route path="/terms" element={<EcosystemShell productName="ViDA UBL Validator"><Terms /></EcosystemShell>} />
+            <Route path="/security" element={<EcosystemShell productName="ViDA UBL Validator"><Security /></EcosystemShell>} />
+
+            {/* SEO Pages - Wrapped in Shell (Should be noindex'd via headers) */}
+            <Route path="/vida-validator" element={<EcosystemShell productName="ViDA UBL Validator"><VidaValidator /></EcosystemShell>} />
+            <Route path="/en-16931-validation" element={<EcosystemShell productName="ViDA UBL Validator"><En16931Validation /></EcosystemShell>} />
+            <Route path="/official-compliance-report" element={<EcosystemShell productName="ViDA UBL Validator"><OfficialReport /></EcosystemShell>} />
+            <Route path="/faq" element={<EcosystemShell productName="ViDA UBL Validator"><Faq /></EcosystemShell>} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
