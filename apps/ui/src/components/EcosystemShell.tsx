@@ -51,7 +51,7 @@ export const EcosystemShell: React.FC<EcosystemShellProps> = ({
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-emerald-600 flex items-center justify-center text-xs font-black text-white">
                             BK
                         </div>
-                        <span className="font-bold tracking-tight hidden md:block">
+                        <span className="font-bold tracking-tight hidden md:block pr-1">
                             BauKlar <span className="text-[var(--bk-accent-blue)]">OS</span>
                         </span>
                     </a>
