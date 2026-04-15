@@ -1,7 +1,9 @@
 # 🚀 ViDA UBL Validator & Flattener - Production Ready
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://github.com/IkaRiche/ComplianceHub)
+**Note: This project has merged into [kilu-sdk](https://github.com/IkaRiche/kilu-sdk/tree/main/examples/vi-da-ubl-validator).**
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 [![EN 16931 v2](https://img.shields.io/badge/EN%2016931-v2-blue.svg)](https://ec.europa.eu/digital-building-blocks/wikis/display/CEFDIGITAL/EN+16931+European+Standard)
 [![Peppol BIS 4.0](https://img.shields.io/badge/Peppol%20BIS-4.0-green.svg)](https://docs.peppol.eu/)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
